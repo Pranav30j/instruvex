@@ -9,6 +9,10 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import ExamList from "./pages/ExamList";
+import ExamCreate from "./pages/ExamCreate";
+import ExamView from "./pages/ExamView";
+import ExamTake from "./pages/ExamTake";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,11 +30,27 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route
               path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
+              element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/exams"
+              element={<ProtectedRoute><ExamList /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/exams/create"
+              element={<ProtectedRoute><ExamCreate /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/exams/:examId"
+              element={<ProtectedRoute><ExamView /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/exams/:examId/edit"
+              element={<ProtectedRoute><ExamCreate /></ProtectedRoute>}
+            />
+            <Route
+              path="/exam/:examId/take"
+              element={<ProtectedRoute><ExamTake /></ProtectedRoute>}
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
