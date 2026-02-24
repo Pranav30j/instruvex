@@ -14,6 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
+      exam_submissions: {
+        Row: {
+          created_at: string
+          exam_id: string
+          id: string
+          started_at: string
+          status: Database["public"]["Enums"]["submission_status"]
+          student_id: string
+          submitted_at: string | null
+          total_score: number | null
+        }
+        Insert: {
+          created_at?: string
+          exam_id: string
+          id?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["submission_status"]
+          student_id: string
+          submitted_at?: string | null
+          total_score?: number | null
+        }
+        Update: {
+          created_at?: string
+          exam_id?: string
+          id?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["submission_status"]
+          student_id?: string
+          submitted_at?: string | null
+          total_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_submissions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exams: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_minutes: number
+          end_time: string | null
+          id: string
+          institute_id: string | null
+          passing_marks: number
+          show_results: boolean
+          shuffle_questions: boolean
+          start_time: string | null
+          status: Database["public"]["Enums"]["exam_status"]
+          title: string
+          total_marks: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_minutes?: number
+          end_time?: string | null
+          id?: string
+          institute_id?: string | null
+          passing_marks?: number
+          show_results?: boolean
+          shuffle_questions?: boolean
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["exam_status"]
+          title: string
+          total_marks?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_minutes?: number
+          end_time?: string | null
+          id?: string
+          institute_id?: string | null
+          passing_marks?: number
+          show_results?: boolean
+          shuffle_questions?: boolean
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["exam_status"]
+          title?: string
+          total_marks?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -49,6 +144,143 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      question_options: {
+        Row: {
+          id: string
+          is_correct: boolean
+          option_text: string
+          order_index: number
+          question_id: string
+        }
+        Insert: {
+          id?: string
+          is_correct?: boolean
+          option_text: string
+          order_index?: number
+          question_id: string
+        }
+        Update: {
+          id?: string
+          is_correct?: boolean
+          option_text?: string
+          order_index?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          code_language: string | null
+          code_template: string | null
+          created_at: string
+          exam_id: string
+          expected_answer: string | null
+          id: string
+          marks: number
+          order_index: number
+          question_text: string
+          question_type: Database["public"]["Enums"]["question_type"]
+        }
+        Insert: {
+          code_language?: string | null
+          code_template?: string | null
+          created_at?: string
+          exam_id: string
+          expected_answer?: string | null
+          id?: string
+          marks?: number
+          order_index?: number
+          question_text: string
+          question_type?: Database["public"]["Enums"]["question_type"]
+        }
+        Update: {
+          code_language?: string | null
+          code_template?: string | null
+          created_at?: string
+          exam_id?: string
+          expected_answer?: string | null
+          id?: string
+          marks?: number
+          order_index?: number
+          question_text?: string
+          question_type?: Database["public"]["Enums"]["question_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_answers: {
+        Row: {
+          code_answer: string | null
+          created_at: string
+          id: string
+          marks_awarded: number | null
+          question_id: string
+          selected_option_id: string | null
+          submission_id: string
+          text_answer: string | null
+          updated_at: string
+        }
+        Insert: {
+          code_answer?: string | null
+          created_at?: string
+          id?: string
+          marks_awarded?: number | null
+          question_id: string
+          selected_option_id?: string | null
+          submission_id: string
+          text_answer?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code_answer?: string | null
+          created_at?: string
+          id?: string
+          marks_awarded?: number | null
+          question_id?: string
+          selected_option_id?: string | null
+          submission_id?: string
+          text_answer?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_answers_selected_option_id_fkey"
+            columns: ["selected_option_id"]
+            isOneToOne: false
+            referencedRelation: "question_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_answers_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "exam_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -98,6 +330,9 @@ export type Database = {
         | "instructor"
         | "student"
         | "academy_learner"
+      exam_status: "draft" | "published" | "active" | "completed" | "archived"
+      question_type: "mcq" | "subjective" | "coding"
+      submission_status: "in_progress" | "submitted" | "graded"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -232,6 +467,9 @@ export const Constants = {
         "student",
         "academy_learner",
       ],
+      exam_status: ["draft", "published", "active", "completed", "archived"],
+      question_type: ["mcq", "subjective", "coding"],
+      submission_status: ["in_progress", "submitted", "graded"],
     },
   },
 } as const
