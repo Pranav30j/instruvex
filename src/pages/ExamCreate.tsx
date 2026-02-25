@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Trash2, GripVertical, Code, AlignLeft, ListChecks } from "lucide-react";
+import AIQuestionGenerator from "@/components/exam/AIQuestionGenerator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -314,6 +315,25 @@ const ExamCreate = () => {
           <Button variant="outline" onClick={() => addQuestion("mcq")}><ListChecks size={16} /> Add MCQ</Button>
           <Button variant="outline" onClick={() => addQuestion("subjective")}><AlignLeft size={16} /> Add Subjective</Button>
           <Button variant="outline" onClick={() => addQuestion("coding")}><Code size={16} /> Add Coding</Button>
+          <AIQuestionGenerator
+            onQuestionsGenerated={(generated) => {
+              const newQuestions = generated.map((g) => ({
+                id: crypto.randomUUID(),
+                question_type: "mcq" as QuestionType,
+                question_text: g.question_text,
+                marks: g.marks || 1,
+                options: g.options.map((o) => ({
+                  id: crypto.randomUUID(),
+                  option_text: o.option_text,
+                  is_correct: o.is_correct,
+                })),
+                expected_answer: "",
+                code_template: "",
+                code_language: "javascript",
+              }));
+              setQuestions((prev) => [...prev, ...newQuestions]);
+            }}
+          />
         </div>
 
         {/* Action buttons */}
