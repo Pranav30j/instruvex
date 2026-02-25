@@ -7,12 +7,22 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
+const getFriendlyLoginError = (message: string) => {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("failed to fetch") || normalized.includes("network")) {
+    return "Unable to reach authentication right now. Check your internet/VPN/ad blocker and try again.";
+  }
+
+  return message;
+};
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, session, loading } = useAuth();
+  const { signIn, clearLocalSession, session, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -21,14 +31,38 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    const { error } = await signIn(email, password);
-    setIsLoading(false);
 
-    if (error) {
-      toast({ title: "Sign in failed", description: error.message, variant: "destructive" });
-    } else {
+    if (!navigator.onLine) {
+      toast({
+        title: "You're offline",
+        description: "Please reconnect to the internet and try signing in again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await signIn(email, password);
+
+      if (error) {
+        const normalized = error.message.toLowerCase();
+        if (normalized.includes("failed to fetch") || normalized.includes("network")) {
+          await clearLocalSession();
+        }
+
+        toast({
+          title: "Sign in failed",
+          description: getFriendlyLoginError(error.message),
+          variant: "destructive",
+        });
+        return;
+      }
+
       navigate("/dashboard");
+    } finally {
+      setIsLoading(false);
     }
   };
 
