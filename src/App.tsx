@@ -47,6 +47,10 @@ const App = () => (
               element={<ProtectedRoute><AIGenerator /></ProtectedRoute>}
             />
             <Route
+              path="/dashboard/questions"
+              element={<ProtectedRoute><QuestionBank /></ProtectedRoute>}
+            />
+            <Route
               path="/dashboard/exams/:examId"
               element={<ProtectedRoute><ExamView /></ProtectedRoute>}
             />
