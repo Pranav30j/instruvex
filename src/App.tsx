@@ -14,6 +14,7 @@ import ExamCreate from "./pages/ExamCreate";
 import ExamView from "./pages/ExamView";
 import ExamTake from "./pages/ExamTake";
 import AIGenerator from "./pages/AIGenerator";
+import QuestionBank from "./pages/QuestionBank";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,10 @@ const App = () => (
             <Route
               path="/dashboard/ai"
               element={<ProtectedRoute><AIGenerator /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/questions"
+              element={<ProtectedRoute><QuestionBank /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/exams/:examId"
