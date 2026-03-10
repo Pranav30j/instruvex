@@ -52,6 +52,10 @@ const App = () => (
               element={<ProtectedRoute><QuestionBank /></ProtectedRoute>}
             />
             <Route
+              path="/dashboard/students"
+              element={<ProtectedRoute><Students /></ProtectedRoute>}
+            />
+            <Route
               path="/dashboard/exams/:examId"
               element={<ProtectedRoute><ExamView /></ProtectedRoute>}
             />
