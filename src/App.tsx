@@ -16,6 +16,7 @@ import ExamTake from "./pages/ExamTake";
 import AIGenerator from "./pages/AIGenerator";
 import QuestionBank from "./pages/QuestionBank";
 import Students from "./pages/Students";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
