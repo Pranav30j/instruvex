@@ -14,6 +14,7 @@ const sidebarItems = [
   { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
   { icon: Award, label: "Certifications", path: "/dashboard/certs" },
   { icon: Users, label: "Students", path: "/dashboard/students" },
+  { icon: Building2, label: "Institutions", path: "/dashboard/institutions" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
