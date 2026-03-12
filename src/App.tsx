@@ -18,6 +18,7 @@ import QuestionBank from "./pages/QuestionBank";
 import Students from "./pages/Students";
 import Settings from "./pages/Settings";
 import Institutions from "./pages/Institutions";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,10 @@ const App = () => (
             <Route
               path="/dashboard/institutions"
               element={<ProtectedRoute><Institutions /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/analytics"
+              element={<ProtectedRoute><Analytics /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/exams/:examId"
