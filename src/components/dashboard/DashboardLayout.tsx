@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Bell,
+  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Bell, Building2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +14,7 @@ const sidebarItems = [
   { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
   { icon: Award, label: "Certifications", path: "/dashboard/certs" },
   { icon: Users, label: "Students", path: "/dashboard/students" },
+  { icon: Building2, label: "Institutions", path: "/dashboard/institutions" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
