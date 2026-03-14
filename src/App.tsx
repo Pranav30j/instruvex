@@ -19,6 +19,9 @@ import Students from "./pages/Students";
 import Settings from "./pages/Settings";
 import Institutions from "./pages/Institutions";
 import Analytics from "./pages/Analytics";
+import AcademyHome from "./pages/AcademyHome";
+import AcademyCourseDetail from "./pages/AcademyCourseDetail";
+import AcademyManage from "./pages/AcademyManage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -81,6 +84,18 @@ const App = () => (
             <Route
               path="/exam/:examId/take"
               element={<ProtectedRoute><ExamTake /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/academy"
+              element={<ProtectedRoute><AcademyHome /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/academy/course/:courseId"
+              element={<ProtectedRoute><AcademyCourseDetail /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/academy/manage"
+              element={<ProtectedRoute><AcademyManage /></ProtectedRoute>}
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
