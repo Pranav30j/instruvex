@@ -15,6 +15,7 @@ const sidebarItems = [
   { icon: Award, label: "Certifications", path: "/dashboard/certs" },
   { icon: Users, label: "Students", path: "/dashboard/students" },
   { icon: Building2, label: "Institutions", path: "/dashboard/institutions" },
+  { icon: GraduationCap, label: "Academy", path: "/dashboard/academy" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 

@@ -85,6 +85,18 @@ const App = () => (
               path="/exam/:examId/take"
               element={<ProtectedRoute><ExamTake /></ProtectedRoute>}
             />
+            <Route
+              path="/dashboard/academy"
+              element={<ProtectedRoute><AcademyHome /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/academy/course/:courseId"
+              element={<ProtectedRoute><AcademyCourseDetail /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/academy/manage"
+              element={<ProtectedRoute><AcademyManage /></ProtectedRoute>}
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
