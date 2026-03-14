@@ -19,6 +19,9 @@ import Students from "./pages/Students";
 import Settings from "./pages/Settings";
 import Institutions from "./pages/Institutions";
 import Analytics from "./pages/Analytics";
+import AcademyHome from "./pages/AcademyHome";
+import AcademyCourseDetail from "./pages/AcademyCourseDetail";
+import AcademyManage from "./pages/AcademyManage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
