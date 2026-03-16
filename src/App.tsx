@@ -98,6 +98,7 @@ const App = () => (
               path="/dashboard/academy/manage"
               element={<ProtectedRoute><AcademyManage /></ProtectedRoute>}
             />
+            <Route path="/verify/:certificateId" element={<CertificateVerify />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
