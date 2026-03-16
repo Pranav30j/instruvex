@@ -10,9 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "@/hooks/use-toast";
+import QuizTaker from "@/components/academy/QuizTaker";
 import {
   BookOpen, Clock, GraduationCap, Play, CheckCircle2, FileText,
-  Download, Lock, ArrowLeft, BarChart3,
+  Download, Lock, ArrowLeft, BarChart3, HelpCircle, Award, Trophy,
 } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
@@ -27,6 +28,7 @@ export default function AcademyCourseDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [activeLecture, setActiveLecture] = useState<any>(null);
+  const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
 
   const { data: course, isLoading } = useQuery({
     queryKey: ["academy-course", courseId],
@@ -46,7 +48,7 @@ export default function AcademyCourseDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("academy_modules")
-        .select("*, academy_lectures(*), academy_notes(*)")
+        .select("*, academy_lectures(*), academy_notes(*), academy_quizzes(*)")
         .eq("course_id", courseId!)
         .order("order_index");
       if (error) throw error;
@@ -86,6 +88,20 @@ export default function AcademyCourseDetail() {
     },
   });
 
+  const { data: certificate } = useQuery({
+    queryKey: ["academy-certificate", courseId, user?.id],
+    enabled: !!user && !!enrollment,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("academy_certificates")
+        .select("*")
+        .eq("user_id", user!.id)
+        .eq("course_id", courseId!)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const completedLectureIds = new Set(
     progressData.filter((p: any) => p.completed).map((p: any) => p.lecture_id)
   );
@@ -96,6 +112,23 @@ export default function AcademyCourseDetail() {
   const progressPercent = totalLectures
     ? Math.round((completedLectureIds.size / totalLectures) * 100)
     : 0;
+
+  const handleQuizComplete = async (passed: boolean, quizId: string, isFinalExam: boolean) => {
+    if (passed && isFinalExam && !certificate) {
+      // Issue certificate
+      const certNumber = `INSTRUVEX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      const { error } = await supabase.from("academy_certificates").insert({
+        user_id: user!.id,
+        course_id: courseId!,
+        certificate_number: certNumber,
+      });
+      if (!error) {
+        toast({ title: "🎉 Certificate Earned!", description: `Certificate ID: ${certNumber}` });
+        queryClient.invalidateQueries({ queryKey: ["academy-certificate"] });
+      }
+    }
+    setActiveQuizId(null);
+  };
 
   const enrollMutation = useMutation({
     mutationFn: async () => {
@@ -285,6 +318,50 @@ export default function AcademyCourseDetail() {
           </Card>
         )}
 
+        {/* Active Quiz */}
+        {activeQuizId && isEnrolled && (
+          <div>
+            <Button variant="ghost" size="sm" className="mb-2" onClick={() => setActiveQuizId(null)}>
+              <ArrowLeft size={14} className="mr-1" /> Back to Curriculum
+            </Button>
+            <QuizTaker
+              quizId={activeQuizId}
+              onComplete={(passed) => {
+                const quiz = modules
+                  .flatMap((m: any) => m.academy_quizzes || [])
+                  .find((q: any) => q.id === activeQuizId);
+                handleQuizComplete(passed, activeQuizId, quiz?.is_final_exam || false);
+              }}
+            />
+          </div>
+        )}
+
+        {/* Certificate */}
+        {certificate && (
+          <Card className="border-emerald-500/20 bg-card">
+            <CardContent className="flex items-center gap-4 p-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
+                <Trophy className="h-6 w-6 text-emerald-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-foreground">Certificate Earned!</h3>
+                <p className="text-xs text-muted-foreground">ID: {certificate.certificate_number}</p>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/verify/${certificate.certificate_number}`);
+                  toast({ title: "Link copied!" });
+                }}>
+                  Share
+                </Button>
+                <Button size="sm" onClick={() => window.open(`/verify/${certificate.certificate_number}`, "_blank")}>
+                  <Award size={14} className="mr-1" /> View
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Curriculum */}
         <Card className="border-border bg-card">
           <CardHeader>
@@ -295,6 +372,7 @@ export default function AcademyCourseDetail() {
               {modules.map((mod: any, idx: number) => {
                 const lectures = mod.academy_lectures || [];
                 const notes = mod.academy_notes || [];
+                const quizzes = mod.academy_quizzes || [];
                 const modCompleted = lectures.filter((l: any) => completedLectureIds.has(l.id)).length;
 
                 return (
@@ -308,6 +386,7 @@ export default function AcademyCourseDetail() {
                           <p className="text-sm font-medium text-foreground">{mod.title}</p>
                           <p className="text-xs text-muted-foreground">
                             {lectures.length} lectures {notes.length > 0 && `· ${notes.length} notes`}
+                            {quizzes.length > 0 && ` · ${quizzes.length} quiz${quizzes.length > 1 ? "zes" : ""}`}
                             {isEnrolled && ` · ${modCompleted}/${lectures.length} done`}
                           </p>
                         </div>
@@ -323,7 +402,7 @@ export default function AcademyCourseDetail() {
                           return (
                             <button
                               key={lecture.id}
-                              onClick={() => canPlay && setActiveLecture(lecture)}
+                              onClick={() => { canPlay && setActiveLecture(lecture); setActiveQuizId(null); }}
                               className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
                                 activeLecture?.id === lecture.id
                                   ? "bg-primary/10 text-primary"
@@ -365,6 +444,31 @@ export default function AcademyCourseDetail() {
                             </a>
                           )}
                         </div>
+                      ))}
+                      {/* Quizzes */}
+                      {quizzes.map((quiz: any) => (
+                        <button
+                          key={quiz.id}
+                          onClick={() => { if (isEnrolled) { setActiveQuizId(quiz.id); setActiveLecture(null); } }}
+                          className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
+                            activeQuizId === quiz.id
+                              ? "bg-primary/10 text-primary"
+                              : isEnrolled
+                              ? "text-foreground hover:bg-muted"
+                              : "cursor-not-allowed text-muted-foreground"
+                          }`}
+                        >
+                          {quiz.is_final_exam ? (
+                            <GraduationCap size={14} className="shrink-0 text-amber-400" />
+                          ) : (
+                            <HelpCircle size={14} className="shrink-0 text-primary" />
+                          )}
+                          <span className="flex-1">{quiz.title}</span>
+                          {quiz.is_final_exam && (
+                            <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-400">Final Exam</Badge>
+                          )}
+                          {!isEnrolled && <Lock size={14} className="shrink-0 text-muted-foreground" />}
+                        </button>
                       ))}
                     </AccordionContent>
                   </AccordionItem>

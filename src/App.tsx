@@ -22,6 +22,7 @@ import Analytics from "./pages/Analytics";
 import AcademyHome from "./pages/AcademyHome";
 import AcademyCourseDetail from "./pages/AcademyCourseDetail";
 import AcademyManage from "./pages/AcademyManage";
+import CertificateVerify from "./pages/CertificateVerify";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -97,6 +98,7 @@ const App = () => (
               path="/dashboard/academy/manage"
               element={<ProtectedRoute><AcademyManage /></ProtectedRoute>}
             />
+            <Route path="/verify/:certificateId" element={<CertificateVerify />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

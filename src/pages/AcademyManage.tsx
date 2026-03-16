@@ -16,8 +16,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "@/hooks/use-toast";
 import {
   Plus, BookOpen, Pencil, Trash2, GripVertical, Video, FileText,
-  Eye, EyeOff, Star, Upload,
+  Eye, EyeOff, Star, Upload, HelpCircle,
 } from "lucide-react";
+import QuizManager from "@/components/academy/QuizManager";
 
 export default function AcademyManage() {
   const { user, hasRole } = useAuth();
@@ -494,6 +495,11 @@ export default function AcademyManage() {
                           <Button size="sm" variant="ghost" className="ml-auto text-destructive" onClick={() => { if (confirm("Delete this module and all its content?")) deleteModule.mutate(mod.id); }}>
                             <Trash2 size={12} className="mr-1" /> Delete Module
                           </Button>
+                        </div>
+
+                        {/* Quiz Manager */}
+                        <div className="mt-3 border-t border-border pt-3">
+                          <QuizManager moduleId={mod.id} moduleName={mod.title} />
                         </div>
                       </AccordionContent>
                     </AccordionItem>
