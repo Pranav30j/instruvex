@@ -88,6 +88,20 @@ export default function AcademyCourseDetail() {
     },
   });
 
+  const { data: certificate } = useQuery({
+    queryKey: ["academy-certificate", courseId, user?.id],
+    enabled: !!user && !!enrollment,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("academy_certificates")
+        .select("*")
+        .eq("user_id", user!.id)
+        .eq("course_id", courseId!)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const completedLectureIds = new Set(
     progressData.filter((p: any) => p.completed).map((p: any) => p.lecture_id)
   );
@@ -98,6 +112,23 @@ export default function AcademyCourseDetail() {
   const progressPercent = totalLectures
     ? Math.round((completedLectureIds.size / totalLectures) * 100)
     : 0;
+
+  const handleQuizComplete = async (passed: boolean, quizId: string, isFinalExam: boolean) => {
+    if (passed && isFinalExam && !certificate) {
+      // Issue certificate
+      const certNumber = `INSTRUVEX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      const { error } = await supabase.from("academy_certificates").insert({
+        user_id: user!.id,
+        course_id: courseId!,
+        certificate_number: certNumber,
+      });
+      if (!error) {
+        toast({ title: "🎉 Certificate Earned!", description: `Certificate ID: ${certNumber}` });
+        queryClient.invalidateQueries({ queryKey: ["academy-certificate"] });
+      }
+    }
+    setActiveQuizId(null);
+  };
 
   const enrollMutation = useMutation({
     mutationFn: async () => {
