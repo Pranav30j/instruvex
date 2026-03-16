@@ -496,6 +496,11 @@ export default function AcademyManage() {
                             <Trash2 size={12} className="mr-1" /> Delete Module
                           </Button>
                         </div>
+
+                        {/* Quiz Manager */}
+                        <div className="mt-3 border-t border-border pt-3">
+                          <QuizManager moduleId={mod.id} moduleName={mod.title} />
+                        </div>
                       </AccordionContent>
                     </AccordionItem>
                   ))}
