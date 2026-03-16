@@ -16,8 +16,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "@/hooks/use-toast";
 import {
   Plus, BookOpen, Pencil, Trash2, GripVertical, Video, FileText,
-  Eye, EyeOff, Star, Upload,
+  Eye, EyeOff, Star, Upload, HelpCircle,
 } from "lucide-react";
+import QuizManager from "@/components/academy/QuizManager";
 
 export default function AcademyManage() {
   const { user, hasRole } = useAuth();
