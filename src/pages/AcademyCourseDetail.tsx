@@ -10,9 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "@/hooks/use-toast";
+import QuizTaker from "@/components/academy/QuizTaker";
 import {
   BookOpen, Clock, GraduationCap, Play, CheckCircle2, FileText,
-  Download, Lock, ArrowLeft, BarChart3,
+  Download, Lock, ArrowLeft, BarChart3, HelpCircle, Award, Trophy,
 } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
