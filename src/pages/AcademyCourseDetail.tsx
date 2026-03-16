@@ -28,6 +28,7 @@ export default function AcademyCourseDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [activeLecture, setActiveLecture] = useState<any>(null);
+  const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
 
   const { data: course, isLoading } = useQuery({
     queryKey: ["academy-course", courseId],
