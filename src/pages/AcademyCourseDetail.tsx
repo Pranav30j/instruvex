@@ -48,7 +48,7 @@ export default function AcademyCourseDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("academy_modules")
-        .select("*, academy_lectures(*), academy_notes(*)")
+        .select("*, academy_lectures(*), academy_notes(*), academy_quizzes(*)")
         .eq("course_id", courseId!)
         .order("order_index");
       if (error) throw error;
