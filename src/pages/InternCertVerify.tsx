@@ -151,7 +151,6 @@ function AcademyCard({ cert, url }: { cert: any; url: string }) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
-          <Row icon={User} label="Awarded To" value={name} />
           <Row icon={Briefcase} label="Course" value={course?.title || "Unknown Course"} />
           <Row icon={Calendar} label="Issued On" value={new Date(cert.issued_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} />
           <Row icon={Hash} label="Certificate ID" value={cert.certificate_number} mono />
