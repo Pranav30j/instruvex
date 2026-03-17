@@ -646,6 +646,51 @@ export type Database = {
         }
         Relationships: []
       }
+      internship_certificates: {
+        Row: {
+          candidate_name: string
+          certificate_id: string
+          created_at: string
+          created_by: string
+          end_date: string
+          id: string
+          issue_date: string
+          organization: string
+          role: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_name: string
+          certificate_id: string
+          created_at?: string
+          created_by: string
+          end_date: string
+          id?: string
+          issue_date?: string
+          organization?: string
+          role: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_name?: string
+          certificate_id?: string
+          created_at?: string
+          created_by?: string
+          end_date?: string
+          id?: string
+          issue_date?: string
+          organization?: string
+          role?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
