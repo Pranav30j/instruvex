@@ -22,7 +22,9 @@ import Analytics from "./pages/Analytics";
 import AcademyHome from "./pages/AcademyHome";
 import AcademyCourseDetail from "./pages/AcademyCourseDetail";
 import AcademyManage from "./pages/AcademyManage";
-import CertificateVerify from "./pages/CertificateVerify";
+import CertificationsAdmin from "./pages/CertificationsAdmin";
+import VerifyPortal from "./pages/VerifyPortal";
+import InternCertVerify from "./pages/InternCertVerify";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -98,7 +100,12 @@ const App = () => (
               path="/dashboard/academy/manage"
               element={<ProtectedRoute><AcademyManage /></ProtectedRoute>}
             />
-            <Route path="/verify/:certificateId" element={<CertificateVerify />} />
+            <Route
+              path="/dashboard/certs"
+              element={<ProtectedRoute><CertificationsAdmin /></ProtectedRoute>}
+            />
+            <Route path="/verify" element={<VerifyPortal />} />
+            <Route path="/verify/:certificateId" element={<InternCertVerify />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
