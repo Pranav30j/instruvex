@@ -35,6 +35,11 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <Routes>
+          {/* Public verification routes — NO auth provider */}
+          <Route path="/verify" element={<VerifyPortal />} />
+          <Route path="/verify/:certificateId" element={<InternCertVerify />} />
+        </Routes>
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -104,9 +109,6 @@ const App = () => (
               path="/dashboard/certs"
               element={<ProtectedRoute><CertificationsAdmin /></ProtectedRoute>}
             />
-            <Route path="/verify" element={<VerifyPortal />} />
-            <Route path="/verify/:certificateId" element={<InternCertVerify />} />
-            <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>

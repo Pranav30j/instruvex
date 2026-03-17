@@ -24,7 +24,7 @@ export default function VerifyPortal() {
       const id = searchId!.trim();
       const { data: cert, error: err } = await supabase
         .from("internship_certificates")
-        .select("*")
+        .select("certificate_id, candidate_name, role, organization, start_date, end_date, issue_date, status")
         .eq("certificate_id", id)
         .maybeSingle();
       if (err) throw err;

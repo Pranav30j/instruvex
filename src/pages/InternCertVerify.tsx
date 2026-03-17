@@ -17,29 +17,24 @@ export default function InternCertVerify() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["verify-intern-direct", certificateId],
     queryFn: async () => {
-      // Try internship certificates first
+      // Try internship certificates first — only select public-safe fields
       const { data: intern, error: internErr } = await supabase
         .from("internship_certificates")
-        .select("*")
+        .select("certificate_id, candidate_name, role, organization, start_date, end_date, issue_date, status")
         .eq("certificate_id", certificateId!)
         .maybeSingle();
       if (internErr) throw internErr;
       if (intern) return { type: "internship" as const, data: intern };
 
-      // Fallback to academy certificates
+      // Fallback to academy certificates — only select public-safe fields
       const { data: academy, error: acadErr } = await supabase
         .from("academy_certificates")
-        .select("*, academy_courses(*)")
+        .select("certificate_number, issued_at, academy_courses(title, instructor_name)")
         .eq("certificate_number", certificateId!)
         .maybeSingle();
       if (acadErr) throw acadErr;
       if (academy) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("first_name, last_name, email")
-          .eq("user_id", academy.user_id)
-          .maybeSingle();
-        return { type: "academy" as const, data: { ...academy, profile } };
+        return { type: "academy" as const, data: academy };
       }
 
       return null;
@@ -144,9 +139,6 @@ function InternshipCard({ cert, url }: { cert: any; url: string }) {
 
 function AcademyCard({ cert, url }: { cert: any; url: string }) {
   const course = cert.academy_courses as any;
-  const name = cert.profile
-    ? `${cert.profile.first_name || ""} ${cert.profile.last_name || ""}`.trim() || cert.profile.email
-    : "Unknown User";
 
   return (
     <Card className="border-emerald-500/30 bg-card">
@@ -159,7 +151,6 @@ function AcademyCard({ cert, url }: { cert: any; url: string }) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
-          <Row icon={User} label="Awarded To" value={name} />
           <Row icon={Briefcase} label="Course" value={course?.title || "Unknown Course"} />
           <Row icon={Calendar} label="Issued On" value={new Date(cert.issued_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} />
           <Row icon={Hash} label="Certificate ID" value={cert.certificate_number} mono />
