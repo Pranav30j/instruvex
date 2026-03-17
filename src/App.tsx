@@ -100,7 +100,12 @@ const App = () => (
               path="/dashboard/academy/manage"
               element={<ProtectedRoute><AcademyManage /></ProtectedRoute>}
             />
-            <Route path="/verify/:certificateId" element={<CertificateVerify />} />
+            <Route
+              path="/dashboard/certs"
+              element={<ProtectedRoute><CertificationsAdmin /></ProtectedRoute>}
+            />
+            <Route path="/verify" element={<VerifyPortal />} />
+            <Route path="/verify/:certificateId" element={<InternCertVerify />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
