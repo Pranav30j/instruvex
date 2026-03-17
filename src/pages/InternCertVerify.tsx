@@ -139,9 +139,6 @@ function InternshipCard({ cert, url }: { cert: any; url: string }) {
 
 function AcademyCard({ cert, url }: { cert: any; url: string }) {
   const course = cert.academy_courses as any;
-  const name = cert.profile
-    ? `${cert.profile.first_name || ""} ${cert.profile.last_name || ""}`.trim() || cert.profile.email
-    : "Unknown User";
 
   return (
     <Card className="border-emerald-500/30 bg-card">
