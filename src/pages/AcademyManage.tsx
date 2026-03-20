@@ -319,6 +319,16 @@ export default function AcademyManage() {
                     <Input placeholder="e.g. 8 hours" value={courseForm.duration_estimate} onChange={(e) => setCourseForm({ ...courseForm, duration_estimate: e.target.value })} />
                   </div>
                 </div>
+                <FileUploadField
+                  label="Course Thumbnail"
+                  value={courseForm.thumbnail_url}
+                  onChange={(url) => setCourseForm({ ...courseForm, thumbnail_url: url })}
+                  folder="thumbnails"
+                  accept="image/*"
+                  acceptedTypes={["image/"]}
+                  maxSizeMB={10}
+                  placeholder="Paste image URL"
+                />
                 <div>
                   <Label>Learning Outcomes (one per line)</Label>
                   <Textarea value={courseForm.learning_outcomes} onChange={(e) => setCourseForm({ ...courseForm, learning_outcomes: e.target.value })} rows={4} placeholder="Understand core concepts of ML&#10;Build a neural network from scratch" />
