@@ -475,7 +475,17 @@ export default function AcademyManage() {
                               <DialogHeader><DialogTitle>Add Lecture</DialogTitle></DialogHeader>
                               <div className="space-y-4">
                                 <div><Label>Title *</Label><Input value={lectureForm.title} onChange={(e) => setLectureForm({ ...lectureForm, title: e.target.value })} /></div>
-                                <div><Label>Video URL</Label><Input placeholder="YouTube/Vimeo embed URL" value={lectureForm.video_url} onChange={(e) => setLectureForm({ ...lectureForm, video_url: e.target.value })} /></div>
+                                <FileUploadField
+                                  label="Video"
+                                  value={lectureForm.video_url}
+                                  onChange={(url) => setLectureForm({ ...lectureForm, video_url: url })}
+                                  folder="videos"
+                                  accept="video/*"
+                                  acceptedTypes={["video/"]}
+                                  maxSizeMB={100}
+                                  placeholder="YouTube/Vimeo embed URL or upload video"
+                                  allowUrl
+                                />
                                 <div><Label>Description</Label><Textarea value={lectureForm.description} onChange={(e) => setLectureForm({ ...lectureForm, description: e.target.value })} rows={2} /></div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div><Label>Duration (min)</Label><Input type="number" value={lectureForm.duration_minutes} onChange={(e) => setLectureForm({ ...lectureForm, duration_minutes: e.target.value })} /></div>
