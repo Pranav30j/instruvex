@@ -169,7 +169,6 @@ export default function AcademyCourseCreate() {
             </div>
 
             <div className="space-y-2">
-              <Label>Thumbnail</Label>
               <FileUploadField
                 label="Thumbnail"
                 value={form.thumbnail_url}
