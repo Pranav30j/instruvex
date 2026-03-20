@@ -86,6 +86,7 @@ export default function AcademyManage() {
         price: parseFloat(courseForm.price) || 0,
         difficulty: courseForm.difficulty,
         duration_estimate: courseForm.duration_estimate || null,
+        thumbnail_url: courseForm.thumbnail_url || null,
         learning_outcomes: courseForm.learning_outcomes
           ? courseForm.learning_outcomes.split("\n").filter(Boolean)
           : [],
