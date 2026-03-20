@@ -1,27 +1,35 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Bell, Building2, GraduationCap,
+  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Bell, Building2, GraduationCap, ShieldCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, AppRole } from "@/contexts/AuthContext";
 
-const sidebarItems = [
+interface SidebarItem {
+  icon: typeof LayoutDashboard;
+  label: string;
+  path: string;
+  roles?: AppRole[]; // if undefined, visible to all
+}
+
+const allSidebarItems: SidebarItem[] = [
   { icon: LayoutDashboard, label: "Overview", path: "/dashboard" },
-  { icon: FileText, label: "Examinations", path: "/dashboard/exams" },
-  { icon: Brain, label: "AI Generator", path: "/dashboard/ai" },
-  { icon: BookOpen, label: "Question Bank", path: "/dashboard/questions" },
-  { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
-  { icon: Award, label: "Certifications", path: "/dashboard/certs" },
-  { icon: Users, label: "Students", path: "/dashboard/students" },
-  { icon: Building2, label: "Institutions", path: "/dashboard/institutions" },
+  { icon: FileText, label: "Examinations", path: "/dashboard/exams", roles: ["super_admin", "institute_admin", "instructor", "student"] },
+  { icon: Brain, label: "AI Generator", path: "/dashboard/ai", roles: ["super_admin", "instructor"] },
+  { icon: BookOpen, label: "Question Bank", path: "/dashboard/questions", roles: ["super_admin", "instructor", "student"] },
+  { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics", roles: ["super_admin", "institute_admin", "instructor"] },
+  { icon: Award, label: "Certifications", path: "/dashboard/certs", roles: ["super_admin", "institute_admin"] },
+  { icon: Users, label: "Students", path: "/dashboard/students", roles: ["super_admin", "institute_admin", "instructor"] },
+  { icon: Building2, label: "Institutions", path: "/dashboard/institutions", roles: ["super_admin", "institute_admin"] },
   { icon: GraduationCap, label: "Academy", path: "/dashboard/academy" },
+  { icon: ShieldCheck, label: "User Roles", path: "/dashboard/roles", roles: ["super_admin", "institute_admin"] },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { profile, roles, signOut } = useAuth();
+  const { profile, activeRole, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -34,14 +42,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     ? `${profile.first_name[0]}${profile.last_name?.[0] || ""}`.toUpperCase()
     : "U";
 
-  const primaryRole = roles[0]?.replace("_", " ") || "Learner";
+  const displayRole = activeRole?.replace(/_/g, " ") || "Learner";
+
+  const filteredItems = allSidebarItems.filter(
+    (item) => !item.roles || (activeRole && item.roles.includes(activeRole))
+  );
 
   const isActive = (path: string) =>
     path === "/dashboard" ? location.pathname === "/dashboard" : location.pathname.startsWith(path);
 
   const NavItems = () => (
     <>
-      {sidebarItems.map((item) => (
+      {filteredItems.map((item) => (
         <Link
           key={item.label}
           to={item.path}
@@ -69,7 +81,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
           <span className="font-display text-lg font-bold text-foreground">Instruvex</span>
         </div>
-        <nav className="flex-1 space-y-1 p-4"><NavItems /></nav>
+        <nav className="flex-1 space-y-1 overflow-y-auto p-4"><NavItems /></nav>
         <div className="border-t border-border p-4">
           <button onClick={handleSignOut} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-navy-elevated hover:text-foreground">
             <LogOut size={18} /> Sign Out
@@ -87,7 +99,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 <span className="font-display text-lg font-bold text-foreground">Instruvex</span>
                 <button onClick={() => setSidebarOpen(false)} className="text-muted-foreground"><X size={20} /></button>
               </div>
-              <nav className="flex-1 space-y-1 p-4"><NavItems /></nav>
+              <nav className="flex-1 space-y-1 overflow-y-auto p-4"><NavItems /></nav>
               <div className="border-t border-border p-4">
                 <button onClick={handleSignOut} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-navy-elevated hover:text-foreground">
                   <LogOut size={18} /> Sign Out
@@ -105,7 +117,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <button className="text-muted-foreground lg:hidden" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden text-xs capitalize text-muted-foreground sm:block">{primaryRole}</span>
+            <span className="hidden rounded-md bg-steel/10 px-2.5 py-1 text-xs capitalize text-steel sm:block">{displayRole}</span>
             <button className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-navy-elevated hover:text-foreground">
               <Bell size={18} />
               <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-steel" />
