@@ -292,13 +292,23 @@ export default function AcademyCourseDetail() {
         {activeLecture?.video_url && isEnrolled && (
           <Card className="border-border bg-card overflow-hidden">
             <div className="aspect-video bg-black">
-              <iframe
-                src={activeLecture.video_url}
-                title={activeLecture.title}
-                className="h-full w-full"
-                allowFullScreen
-                allow="autoplay; fullscreen; picture-in-picture"
-              />
+              {isDirectVideo(activeLecture.video_url) ? (
+                <video
+                  key={activeLecture.id}
+                  src={activeLecture.video_url}
+                  controls
+                  className="h-full w-full"
+                  controlsList="nodownload"
+                />
+              ) : (
+                <iframe
+                  src={activeLecture.video_url}
+                  title={activeLecture.title}
+                  className="h-full w-full"
+                  allowFullScreen
+                  allow="autoplay; fullscreen; picture-in-picture"
+                />
+              )}
             </div>
             <CardContent className="p-4">
               <h3 className="font-display text-lg font-semibold text-foreground">{activeLecture.title}</h3>
