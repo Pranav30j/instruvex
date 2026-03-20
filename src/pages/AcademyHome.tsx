@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import {
   Search, BookOpen, Clock, BarChart3, Star, GraduationCap, Award,
-  TrendingUp, Play, ChevronRight,
+  TrendingUp, Play, ChevronRight, Plus,
 } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
