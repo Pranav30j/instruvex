@@ -230,7 +230,7 @@ export default function AcademyManage() {
     setCourseForm({
       title: "", description: "", category: "", instructor_name: "",
       price: "0", difficulty: "beginner", duration_estimate: "",
-      learning_outcomes: "",
+      learning_outcomes: "", thumbnail_url: "",
     });
   };
 
