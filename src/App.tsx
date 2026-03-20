@@ -104,8 +104,12 @@ const App = () => (
               element={<ProtectedRoute><AcademyCourseDetail /></ProtectedRoute>}
             />
             <Route
+              path="/dashboard/academy/create"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><AcademyCourseCreate /></ProtectedRoute>}
+            />
+            <Route
               path="/dashboard/academy/manage"
-              element={<ProtectedRoute allowedRoles={["super_admin", "instructor"]}><AcademyManage /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><AcademyManage /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/certs"

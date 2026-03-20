@@ -171,6 +171,7 @@ export default function AcademyCourseCreate() {
             <div className="space-y-2">
               <Label>Thumbnail</Label>
               <FileUploadField
+                label="Thumbnail"
                 value={form.thumbnail_url}
                 onChange={(url) => update("thumbnail_url", url)}
                 accept="image/*"

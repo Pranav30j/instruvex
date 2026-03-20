@@ -22,10 +22,12 @@ const difficultyColor: Record<string, string> = {
 };
 
 export default function AcademyHome() {
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+
+  const canManage = hasRole("super_admin") || hasRole("institute_admin") || hasRole("instructor");
 
   // Fetch published courses
   const { data: courses = [] } = useQuery({
