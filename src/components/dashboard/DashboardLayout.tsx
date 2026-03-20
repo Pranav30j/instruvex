@@ -1,10 +1,20 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Bell, Building2, GraduationCap, ShieldCheck,
+  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Bell, Building2, GraduationCap, ShieldCheck, ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+
+const ROLE_LABELS: Record<AppRole, string> = {
+  super_admin: "Super Admin",
+  institute_admin: "Institute Admin",
+  instructor: "Instructor",
+  student: "Student",
+  academy_learner: "Academy Learner",
+};
 
 interface SidebarItem {
   icon: typeof LayoutDashboard;
@@ -29,20 +39,26 @@ const allSidebarItems: SidebarItem[] = [
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { profile, activeRole, signOut } = useAuth();
+  const { profile, activeRole, roles, switchRole, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
 
+  const handleRoleSwitch = (role: AppRole) => {
+    switchRole(role);
+    toast({ title: "Role switched", description: `Now viewing as ${ROLE_LABELS[role]}` });
+  };
+
   const initials = profile?.first_name
     ? `${profile.first_name[0]}${profile.last_name?.[0] || ""}`.toUpperCase()
     : "U";
 
-  const displayRole = activeRole?.replace(/_/g, " ") || "Learner";
+  const displayRole = activeRole ? ROLE_LABELS[activeRole] : "Learner";
 
   const filteredItems = allSidebarItems.filter(
     (item) => !item.roles || (activeRole && item.roles.includes(activeRole))
@@ -117,7 +133,30 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <button className="text-muted-foreground lg:hidden" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden rounded-md bg-steel/10 px-2.5 py-1 text-xs capitalize text-steel sm:block">{displayRole}</span>
+            {roles.length > 1 ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="hidden items-center gap-1.5 rounded-md bg-steel/10 px-2.5 py-1 text-xs text-steel transition-colors hover:bg-steel/20 sm:flex">
+                    {displayRole}
+                    <ChevronDown size={12} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-[160px]">
+                  {roles.map((role) => (
+                    <DropdownMenuItem
+                      key={role}
+                      onClick={() => handleRoleSwitch(role)}
+                      className={role === activeRole ? "bg-steel/10 font-medium text-steel" : ""}
+                    >
+                      {ROLE_LABELS[role]}
+                      {role === activeRole && " ✓"}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <span className="hidden rounded-md bg-steel/10 px-2.5 py-1 text-xs text-steel sm:block">{displayRole}</span>
+            )}
             <button className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-navy-elevated hover:text-foreground">
               <Bell size={18} />
               <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-steel" />
