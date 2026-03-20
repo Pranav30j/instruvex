@@ -22,6 +22,9 @@ const difficultyColor: Record<string, string> = {
   advanced: "bg-rose-500/20 text-rose-400",
 };
 
+const isDirectVideo = (url: string) =>
+  /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+
 export default function AcademyCourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
