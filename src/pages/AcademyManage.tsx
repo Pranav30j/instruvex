@@ -509,7 +509,16 @@ export default function AcademyManage() {
                               <DialogHeader><DialogTitle>Add Note</DialogTitle></DialogHeader>
                               <div className="space-y-4">
                                 <div><Label>Title *</Label><Input value={noteForm.title} onChange={(e) => setNoteForm({ ...noteForm, title: e.target.value })} /></div>
-                                <div><Label>File URL *</Label><Input placeholder="PDF or document URL" value={noteForm.file_url} onChange={(e) => setNoteForm({ ...noteForm, file_url: e.target.value })} /></div>
+                                <FileUploadField
+                                  label="File"
+                                  value={noteForm.file_url}
+                                  onChange={(url) => setNoteForm({ ...noteForm, file_url: url })}
+                                  folder="notes"
+                                  accept=".pdf,.doc,.docx,.ppt,.pptx"
+                                  maxSizeMB={50}
+                                  placeholder="Paste file URL or upload"
+                                  allowUrl
+                                />
                                 <Button onClick={() => saveNote.mutate()} disabled={!noteForm.title || !noteForm.file_url || saveNote.isPending} className="w-full">Add Note</Button>
                               </div>
                             </DialogContent>
