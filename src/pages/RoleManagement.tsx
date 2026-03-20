@@ -95,6 +95,13 @@ const RoleManagement = () => {
   };
 
   const handleRemoveRole = async (userId: string, role: AppRole) => {
+    if (role === "super_admin") {
+      const superAdminCount = users.filter((u) => u.roles.includes("super_admin")).length;
+      if (superAdminCount <= 1) {
+        toast({ title: "Cannot remove", description: "At least one super_admin must exist.", variant: "destructive" });
+        return;
+      }
+    }
     try {
       const { error } = await supabase
         .from("user_roles")
@@ -104,8 +111,9 @@ const RoleManagement = () => {
       if (error) throw error;
       toast({ title: "Role removed", description: `${ROLE_LABELS[role]} role removed.` });
       await fetchUsers();
-    } catch {
-      toast({ title: "Error", description: "Failed to remove role.", variant: "destructive" });
+    } catch (err: any) {
+      const msg = err?.message?.includes("super_admin") ? err.message : "Failed to remove role.";
+      toast({ title: "Error", description: msg, variant: "destructive" });
     }
   };
 
