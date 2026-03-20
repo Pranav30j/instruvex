@@ -189,14 +189,26 @@ export default function AcademyHome() {
             <h1 className="font-display text-2xl font-bold text-foreground">Instruvex Academy</h1>
             <p className="text-sm text-muted-foreground">Master new skills with expert-led courses and certifications</p>
           </div>
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search courses..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
+          <div className="flex items-center gap-3">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search courses..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {canManage && (
+              <>
+                <Button size="sm" onClick={() => navigate("/dashboard/academy/create")}>
+                  <Plus size={16} className="mr-1" /> Add Course
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => navigate("/dashboard/academy/manage")}>
+                  Manage
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
