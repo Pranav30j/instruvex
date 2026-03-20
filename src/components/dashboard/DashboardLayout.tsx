@@ -123,7 +123,30 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <button className="text-muted-foreground lg:hidden" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden rounded-md bg-steel/10 px-2.5 py-1 text-xs capitalize text-steel sm:block">{displayRole}</span>
+            {roles.length > 1 ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="hidden items-center gap-1.5 rounded-md bg-steel/10 px-2.5 py-1 text-xs text-steel transition-colors hover:bg-steel/20 sm:flex">
+                    {displayRole}
+                    <ChevronDown size={12} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-[160px]">
+                  {roles.map((role) => (
+                    <DropdownMenuItem
+                      key={role}
+                      onClick={() => handleRoleSwitch(role)}
+                      className={role === activeRole ? "bg-steel/10 font-medium text-steel" : ""}
+                    >
+                      {ROLE_LABELS[role]}
+                      {role === activeRole && " ✓"}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <span className="hidden rounded-md bg-steel/10 px-2.5 py-1 text-xs text-steel sm:block">{displayRole}</span>
+            )}
             <button className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-navy-elevated hover:text-foreground">
               <Bell size={18} />
               <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-steel" />
