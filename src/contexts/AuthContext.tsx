@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-type AppRole = "super_admin" | "institute_admin" | "instructor" | "student" | "academy_learner";
+export type AppRole = "super_admin" | "institute_admin" | "instructor" | "student" | "academy_learner";
 
 interface Profile {
   id: string;
@@ -19,15 +19,21 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   roles: AppRole[];
+  activeRole: AppRole | null;
   loading: boolean;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   clearLocalSession: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
+  switchRole: (role: AppRole) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const ACTIVE_ROLE_KEY = "instruvex_active_role";
+
+const ROLE_PRIORITY: AppRole[] = ["super_admin", "institute_admin", "instructor", "student", "academy_learner"];
 
 const isNetworkFetchError = (error: unknown) => {
   if (!error || typeof error !== "object") return false;
@@ -40,6 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
+  const [activeRole, setActiveRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
 
   const clearLocalSession = async () => {
@@ -48,6 +55,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setProfile(null);
     setRoles([]);
+    setActiveRole(null);
+    localStorage.removeItem(ACTIVE_ROLE_KEY);
+  };
+
+  const resolveActiveRole = (userRoles: AppRole[]): AppRole | null => {
+    if (userRoles.length === 0) return null;
+    const stored = localStorage.getItem(ACTIVE_ROLE_KEY) as AppRole | null;
+    if (stored && userRoles.includes(stored)) return stored;
+    // Pick highest priority role
+    for (const r of ROLE_PRIORITY) {
+      if (userRoles.includes(r)) return r;
+    }
+    return userRoles[0];
   };
 
   const fetchProfile = async (userId: string) => {
@@ -68,7 +88,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .eq("user_id", userId);
 
     if (error) throw error;
-    setRoles((data || []).map((r: { role: AppRole }) => r.role));
+    const userRoles = (data || []).map((r: { role: AppRole }) => r.role);
+    setRoles(userRoles);
+    const active = resolveActiveRole(userRoles);
+    setActiveRole(active);
+    if (active) localStorage.setItem(ACTIVE_ROLE_KEY, active);
   };
 
   const hydrateSessionState = async (nextSession: Session | null) => {
@@ -78,6 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!nextSession?.user) {
       setProfile(null);
       setRoles([]);
+      setActiveRole(null);
       setLoading(false);
       return;
     }
@@ -93,6 +118,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setProfile(null);
         setRoles([]);
+        setActiveRole(null);
       }
     } finally {
       setLoading(false);
@@ -158,12 +184,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setProfile(null);
     setRoles([]);
+    setActiveRole(null);
+    localStorage.removeItem(ACTIVE_ROLE_KEY);
   };
 
   const hasRole = (role: AppRole) => roles.includes(role);
 
+  const switchRole = (role: AppRole) => {
+    if (!roles.includes(role)) return;
+    setActiveRole(role);
+    localStorage.setItem(ACTIVE_ROLE_KEY, role);
+  };
+
   return (
-    <AuthContext.Provider value={{ session, user, profile, roles, loading, signUp, signIn, signOut, clearLocalSession, hasRole }}>
+    <AuthContext.Provider value={{ session, user, profile, roles, activeRole, loading, signUp, signIn, signOut, clearLocalSession, hasRole, switchRole }}>
       {children}
     </AuthContext.Provider>
   );
