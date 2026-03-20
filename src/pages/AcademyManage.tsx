@@ -19,6 +19,7 @@ import {
   Eye, EyeOff, Star, Upload, HelpCircle,
 } from "lucide-react";
 import QuizManager from "@/components/academy/QuizManager";
+import FileUploadField from "@/components/academy/FileUploadField";
 
 export default function AcademyManage() {
   const { user, hasRole } = useAuth();
