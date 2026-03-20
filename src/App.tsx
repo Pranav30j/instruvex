@@ -21,6 +21,7 @@ import Institutions from "./pages/Institutions";
 import Analytics from "./pages/Analytics";
 import AcademyHome from "./pages/AcademyHome";
 import AcademyCourseDetail from "./pages/AcademyCourseDetail";
+import AcademyCourseCreate from "./pages/AcademyCourseCreate";
 import AcademyManage from "./pages/AcademyManage";
 import CertificationsAdmin from "./pages/CertificationsAdmin";
 import VerifyPortal from "./pages/VerifyPortal";
@@ -103,8 +104,12 @@ const App = () => (
               element={<ProtectedRoute><AcademyCourseDetail /></ProtectedRoute>}
             />
             <Route
+              path="/dashboard/academy/create"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><AcademyCourseCreate /></ProtectedRoute>}
+            />
+            <Route
               path="/dashboard/academy/manage"
-              element={<ProtectedRoute allowedRoles={["super_admin", "instructor"]}><AcademyManage /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><AcademyManage /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/certs"
