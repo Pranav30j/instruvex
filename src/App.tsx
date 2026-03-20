@@ -25,6 +25,7 @@ import AcademyManage from "./pages/AcademyManage";
 import CertificationsAdmin from "./pages/CertificationsAdmin";
 import VerifyPortal from "./pages/VerifyPortal";
 import InternCertVerify from "./pages/InternCertVerify";
+import RoleManagement from "./pages/RoleManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,23 +52,23 @@ const App = () => (
             />
             <Route
               path="/dashboard/exams"
-              element={<ProtectedRoute><ExamList /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor", "student"]}><ExamList /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/exams/create"
-              element={<ProtectedRoute><ExamCreate /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "instructor"]}><ExamCreate /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/ai"
-              element={<ProtectedRoute><AIGenerator /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "instructor"]}><AIGenerator /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/questions"
-              element={<ProtectedRoute><QuestionBank /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "instructor", "student"]}><QuestionBank /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/students"
-              element={<ProtectedRoute><Students /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><Students /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/settings"
@@ -75,11 +76,11 @@ const App = () => (
             />
             <Route
               path="/dashboard/institutions"
-              element={<ProtectedRoute><Institutions /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin"]}><Institutions /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/analytics"
-              element={<ProtectedRoute><Analytics /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><Analytics /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/exams/:examId"
@@ -87,7 +88,7 @@ const App = () => (
             />
             <Route
               path="/dashboard/exams/:examId/edit"
-              element={<ProtectedRoute><ExamCreate /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "instructor"]}><ExamCreate /></ProtectedRoute>}
             />
             <Route
               path="/exam/:examId/take"
@@ -103,11 +104,15 @@ const App = () => (
             />
             <Route
               path="/dashboard/academy/manage"
-              element={<ProtectedRoute><AcademyManage /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "instructor"]}><AcademyManage /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/certs"
-              element={<ProtectedRoute><CertificationsAdmin /></ProtectedRoute>}
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin"]}><CertificationsAdmin /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/roles"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin"]}><RoleManagement /></ProtectedRoute>}
             />
           </Routes>
         </AuthProvider>

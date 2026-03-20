@@ -1,7 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-
-type AppRole = "super_admin" | "institute_admin" | "instructor" | "student" | "academy_learner";
+import { useAuth, AppRole } from "@/contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { session, roles, loading } = useAuth();
+  const { session, activeRole, loading } = useAuth();
 
   if (loading) {
     return (
@@ -23,7 +21,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.some((r) => roles.includes(r))) {
+  if (allowedRoles && activeRole && !allowedRoles.includes(activeRole)) {
     return <Navigate to="/dashboard" replace />;
   }
 
