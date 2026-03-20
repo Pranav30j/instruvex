@@ -21,6 +21,7 @@ import Institutions from "./pages/Institutions";
 import Analytics from "./pages/Analytics";
 import AcademyHome from "./pages/AcademyHome";
 import AcademyCourseDetail from "./pages/AcademyCourseDetail";
+import AcademyCourseCreate from "./pages/AcademyCourseCreate";
 import AcademyManage from "./pages/AcademyManage";
 import CertificationsAdmin from "./pages/CertificationsAdmin";
 import VerifyPortal from "./pages/VerifyPortal";
