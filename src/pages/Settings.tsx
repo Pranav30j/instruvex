@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, AppRole } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,11 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { User, Shield, Bell, Palette, Save, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { User, Shield, Bell, Palette, Save, Loader2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+const ROLE_LABELS: Record<AppRole, string> = {
+  super_admin: "Super Admin",
+  institute_admin: "Institute Admin",
+  instructor: "Instructor",
+  student: "Student",
+  academy_learner: "Academy Learner",
+};
+
 const Settings = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, roles, activeRole, switchRole } = useAuth();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
 
@@ -21,7 +30,6 @@ const Settings = () => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
 
-  // Preferences (local state only)
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [examReminders, setExamReminders] = useState(true);
   const [resultAlerts, setResultAlerts] = useState(true);
@@ -40,14 +48,9 @@ const Settings = () => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-        })
+        .update({ first_name: firstName.trim(), last_name: lastName.trim() })
         .eq("user_id", user.id);
-
       if (error) throw error;
-
       toast({ title: "Profile updated", description: "Your changes have been saved." });
     } catch {
       toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
@@ -72,9 +75,12 @@ const Settings = () => {
     }
   };
 
-  const initials = firstName
-    ? `${firstName[0]}${lastName?.[0] || ""}`.toUpperCase()
-    : "U";
+  const handleRoleSwitch = (role: string) => {
+    switchRole(role as AppRole);
+    toast({ title: "Role switched", description: `Now viewing as ${ROLE_LABELS[role as AppRole]}` });
+  };
+
+  const initials = firstName ? `${firstName[0]}${lastName?.[0] || ""}`.toUpperCase() : "U";
 
   return (
     <DashboardLayout>
@@ -87,6 +93,7 @@ const Settings = () => {
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="bg-muted">
             <TabsTrigger value="profile" className="gap-2"><User size={14} /> Profile</TabsTrigger>
+            <TabsTrigger value="roles" className="gap-2"><RefreshCw size={14} /> Switch Role</TabsTrigger>
             <TabsTrigger value="security" className="gap-2"><Shield size={14} /> Security</TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2"><Bell size={14} /> Notifications</TabsTrigger>
             <TabsTrigger value="appearance" className="gap-2"><Palette size={14} /> Appearance</TabsTrigger>
@@ -101,9 +108,7 @@ const Settings = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-xl font-bold text-primary">
-                    {initials}
-                  </div>
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-xl font-bold text-primary">{initials}</div>
                   <div>
                     <p className="font-medium text-foreground">{firstName} {lastName}</p>
                     <p className="text-sm text-muted-foreground">{email}</p>
@@ -133,6 +138,52 @@ const Settings = () => {
             </Card>
           </TabsContent>
 
+          {/* Switch Role Tab */}
+          <TabsContent value="roles">
+            <Card className="border-border bg-card">
+              <CardHeader>
+                <CardTitle className="text-foreground">Switch Active Role</CardTitle>
+                <CardDescription>
+                  You have {roles.length} role{roles.length !== 1 ? "s" : ""} assigned. Switch your active role to change your dashboard and available features.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label>Active Role</Label>
+                  <Select value={activeRole || ""} onValueChange={handleRoleSwitch}>
+                    <SelectTrigger className="w-full max-w-xs">
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map((role) => (
+                        <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Separator className="bg-border" />
+                <div>
+                  <h3 className="mb-3 text-sm font-medium text-foreground">Your Assigned Roles</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {roles.map((role) => (
+                      <span
+                        key={role}
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          role === activeRole
+                            ? "bg-steel/20 text-steel ring-1 ring-steel/30"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {ROLE_LABELS[role]}
+                        {role === activeRole && " (Active)"}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Security Tab */}
           <TabsContent value="security">
             <Card className="border-border bg-card">
@@ -143,9 +194,7 @@ const Settings = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium text-foreground">Change Password</h3>
-                  <p className="text-sm text-muted-foreground">
-                    We'll send a password reset link to your email address.
-                  </p>
+                  <p className="text-sm text-muted-foreground">We'll send a password reset link to your email address.</p>
                   <Button variant="outline" onClick={handleChangePassword} disabled={saving} className="mt-2">
                     {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : null}
                     Send Reset Link
