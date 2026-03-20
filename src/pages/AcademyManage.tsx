@@ -245,6 +245,7 @@ export default function AcademyManage() {
       difficulty: c.difficulty,
       duration_estimate: c.duration_estimate || "",
       learning_outcomes: (c.learning_outcomes || []).join("\n"),
+      thumbnail_url: c.thumbnail_url || "",
     });
     setCourseDialogOpen(true);
   };
