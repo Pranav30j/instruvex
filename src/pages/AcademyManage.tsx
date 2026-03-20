@@ -19,6 +19,7 @@ import {
   Eye, EyeOff, Star, Upload, HelpCircle,
 } from "lucide-react";
 import QuizManager from "@/components/academy/QuizManager";
+import FileUploadField from "@/components/academy/FileUploadField";
 
 export default function AcademyManage() {
   const { user, hasRole } = useAuth();
@@ -35,7 +36,7 @@ export default function AcademyManage() {
   const [courseForm, setCourseForm] = useState({
     title: "", description: "", category: "", instructor_name: "",
     price: "0", difficulty: "beginner", duration_estimate: "",
-    learning_outcomes: "",
+    learning_outcomes: "", thumbnail_url: "",
   });
   const [moduleForm, setModuleForm] = useState({ title: "" });
   const [lectureForm, setLectureForm] = useState({
@@ -85,6 +86,7 @@ export default function AcademyManage() {
         price: parseFloat(courseForm.price) || 0,
         difficulty: courseForm.difficulty,
         duration_estimate: courseForm.duration_estimate || null,
+        thumbnail_url: courseForm.thumbnail_url || null,
         learning_outcomes: courseForm.learning_outcomes
           ? courseForm.learning_outcomes.split("\n").filter(Boolean)
           : [],
@@ -228,7 +230,7 @@ export default function AcademyManage() {
     setCourseForm({
       title: "", description: "", category: "", instructor_name: "",
       price: "0", difficulty: "beginner", duration_estimate: "",
-      learning_outcomes: "",
+      learning_outcomes: "", thumbnail_url: "",
     });
   };
 
@@ -243,6 +245,7 @@ export default function AcademyManage() {
       difficulty: c.difficulty,
       duration_estimate: c.duration_estimate || "",
       learning_outcomes: (c.learning_outcomes || []).join("\n"),
+      thumbnail_url: c.thumbnail_url || "",
     });
     setCourseDialogOpen(true);
   };
@@ -316,6 +319,16 @@ export default function AcademyManage() {
                     <Input placeholder="e.g. 8 hours" value={courseForm.duration_estimate} onChange={(e) => setCourseForm({ ...courseForm, duration_estimate: e.target.value })} />
                   </div>
                 </div>
+                <FileUploadField
+                  label="Course Thumbnail"
+                  value={courseForm.thumbnail_url}
+                  onChange={(url) => setCourseForm({ ...courseForm, thumbnail_url: url })}
+                  folder="thumbnails"
+                  accept="image/*"
+                  acceptedTypes={["image/"]}
+                  maxSizeMB={10}
+                  placeholder="Paste image URL"
+                />
                 <div>
                   <Label>Learning Outcomes (one per line)</Label>
                   <Textarea value={courseForm.learning_outcomes} onChange={(e) => setCourseForm({ ...courseForm, learning_outcomes: e.target.value })} rows={4} placeholder="Understand core concepts of ML&#10;Build a neural network from scratch" />
@@ -462,7 +475,17 @@ export default function AcademyManage() {
                               <DialogHeader><DialogTitle>Add Lecture</DialogTitle></DialogHeader>
                               <div className="space-y-4">
                                 <div><Label>Title *</Label><Input value={lectureForm.title} onChange={(e) => setLectureForm({ ...lectureForm, title: e.target.value })} /></div>
-                                <div><Label>Video URL</Label><Input placeholder="YouTube/Vimeo embed URL" value={lectureForm.video_url} onChange={(e) => setLectureForm({ ...lectureForm, video_url: e.target.value })} /></div>
+                                <FileUploadField
+                                  label="Video"
+                                  value={lectureForm.video_url}
+                                  onChange={(url) => setLectureForm({ ...lectureForm, video_url: url })}
+                                  folder="videos"
+                                  accept="video/*"
+                                  acceptedTypes={["video/"]}
+                                  maxSizeMB={100}
+                                  placeholder="YouTube/Vimeo embed URL or upload video"
+                                  allowUrl
+                                />
                                 <div><Label>Description</Label><Textarea value={lectureForm.description} onChange={(e) => setLectureForm({ ...lectureForm, description: e.target.value })} rows={2} /></div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div><Label>Duration (min)</Label><Input type="number" value={lectureForm.duration_minutes} onChange={(e) => setLectureForm({ ...lectureForm, duration_minutes: e.target.value })} /></div>
@@ -486,7 +509,16 @@ export default function AcademyManage() {
                               <DialogHeader><DialogTitle>Add Note</DialogTitle></DialogHeader>
                               <div className="space-y-4">
                                 <div><Label>Title *</Label><Input value={noteForm.title} onChange={(e) => setNoteForm({ ...noteForm, title: e.target.value })} /></div>
-                                <div><Label>File URL *</Label><Input placeholder="PDF or document URL" value={noteForm.file_url} onChange={(e) => setNoteForm({ ...noteForm, file_url: e.target.value })} /></div>
+                                <FileUploadField
+                                  label="File"
+                                  value={noteForm.file_url}
+                                  onChange={(url) => setNoteForm({ ...noteForm, file_url: url })}
+                                  folder="notes"
+                                  accept=".pdf,.doc,.docx,.ppt,.pptx"
+                                  maxSizeMB={50}
+                                  placeholder="Paste file URL or upload"
+                                  allowUrl
+                                />
                                 <Button onClick={() => saveNote.mutate()} disabled={!noteForm.title || !noteForm.file_url || saveNote.isPending} className="w-full">Add Note</Button>
                               </div>
                             </DialogContent>
