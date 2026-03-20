@@ -29,20 +29,26 @@ const allSidebarItems: SidebarItem[] = [
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { profile, activeRole, signOut } = useAuth();
+  const { profile, activeRole, roles, switchRole, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
 
+  const handleRoleSwitch = (role: AppRole) => {
+    switchRole(role);
+    toast({ title: "Role switched", description: `Now viewing as ${ROLE_LABELS[role]}` });
+  };
+
   const initials = profile?.first_name
     ? `${profile.first_name[0]}${profile.last_name?.[0] || ""}`.toUpperCase()
     : "U";
 
-  const displayRole = activeRole?.replace(/_/g, " ") || "Learner";
+  const displayRole = activeRole ? ROLE_LABELS[activeRole] : "Learner";
 
   const filteredItems = allSidebarItems.filter(
     (item) => !item.roles || (activeRole && item.roles.includes(activeRole))
