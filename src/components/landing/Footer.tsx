@@ -2,16 +2,16 @@ import { Link } from "react-router-dom";
 
 const footerLinks = {
   Product: [
-    { label: "Features", href: "#features" },
-    { label: "Academy", href: "#academy" },
-    { label: "Pricing", href: "#pricing" },
+    { label: "Features", href: "/#features" },
+    { label: "Academy", href: "/#academy" },
+    { label: "Pricing", href: "/#pricing" },
     { label: "Verify Certificate", href: "/verify" },
   ],
   Company: [
-    { label: "About", href: "#about" },
-    { label: "Blog", href: "#" },
-    { label: "Careers", href: "#" },
-    { label: "Contact", href: "#contact" },
+    { label: "About", href: "/about" },
+    { label: "Blog", href: "/blog" },
+    { label: "Careers", href: "/careers" },
+    { label: "Contact", href: "/contact" },
   ],
   Legal: [
     { label: "Privacy Policy", href: "#" },
