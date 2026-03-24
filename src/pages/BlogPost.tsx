@@ -13,8 +13,8 @@ const BlogPost = () => {
   const { data: post, isLoading } = useQuery({
     queryKey: ["blog-post", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_posts")
+      const { data, error } = await (supabase
+        .from("blog_posts" as any) as any)
         .select("*")
         .eq("slug", slug)
         .eq("is_published", true)

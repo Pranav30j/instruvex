@@ -52,7 +52,7 @@ const Careers = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("job_applications").insert({
+      const { error } = await supabase.from("job_applications" as any).insert({
         job_id: selectedJob,
         name: result.data.name,
         email: result.data.email,

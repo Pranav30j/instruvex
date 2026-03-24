@@ -11,8 +11,8 @@ const Blog = () => {
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["blog-posts"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_posts")
+      const { data, error } = await (supabase
+        .from("blog_posts" as any) as any)
         .select("*")
         .eq("is_published", true)
         .order("published_at", { ascending: false });
