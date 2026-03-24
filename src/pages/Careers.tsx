@@ -31,7 +31,7 @@ const Careers = () => {
   const { data: jobs = [] } = useQuery({
     queryKey: ["job-listings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("job_listings").select("*").eq("is_active", true).order("created_at", { ascending: false });
+      const { data, error } = await (supabase.from("job_listings" as any) as any).select("*").eq("is_active", true).order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
