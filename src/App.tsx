@@ -27,6 +27,11 @@ import CertificationsAdmin from "./pages/CertificationsAdmin";
 import VerifyPortal from "./pages/VerifyPortal";
 import InternCertVerify from "./pages/InternCertVerify";
 import RoleManagement from "./pages/RoleManagement";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Careers from "./pages/Careers";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
