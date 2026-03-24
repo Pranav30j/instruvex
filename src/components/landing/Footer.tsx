@@ -1,9 +1,23 @@
 import { Link } from "react-router-dom";
 
 const footerLinks = {
-  Product: ["Features", "Academy", "Pricing", "Security"],
-  Company: ["About", "Blog", "Careers", "Contact"],
-  Legal: ["Privacy Policy", "Terms of Service", "Cookie Policy"],
+  Product: [
+    { label: "Features", href: "#features" },
+    { label: "Academy", href: "#academy" },
+    { label: "Pricing", href: "#pricing" },
+    { label: "Verify Certificate", href: "/verify" },
+  ],
+  Company: [
+    { label: "About", href: "#about" },
+    { label: "Blog", href: "#" },
+    { label: "Careers", href: "#" },
+    { label: "Contact", href: "#contact" },
+  ],
+  Legal: [
+    { label: "Privacy Policy", href: "#" },
+    { label: "Terms of Service", href: "#" },
+    { label: "Cookie Policy", href: "#" },
+  ],
 };
 
 const Footer = () => (
