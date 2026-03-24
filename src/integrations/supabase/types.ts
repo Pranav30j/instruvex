@@ -471,6 +471,81 @@ export type Database = {
           },
         ]
       }
+      blog_posts: {
+        Row: {
+          author_id: string | null
+          author_name: string
+          content: string
+          created_at: string
+          excerpt: string | null
+          id: string
+          is_published: boolean
+          published_at: string | null
+          slug: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          slug: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          slug?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contact_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_read: boolean
+          message: string
+          name: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_read?: boolean
+          message: string
+          name: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          name?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           code: string | null
@@ -687,6 +762,89 @@ export type Database = {
           role?: string
           start_date?: string
           status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      job_applications: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          job_id: string
+          linkedin_url: string | null
+          message: string | null
+          name: string
+          resume_url: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          job_id: string
+          linkedin_url?: string | null
+          message?: string | null
+          name: string
+          resume_url?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          job_id?: string
+          linkedin_url?: string | null
+          message?: string | null
+          name?: string
+          resume_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_listings: {
+        Row: {
+          created_at: string
+          department: string
+          description: string | null
+          id: string
+          is_active: boolean
+          location: string
+          requirements: string[] | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string
+          requirements?: string[] | null
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string
+          requirements?: string[] | null
+          title?: string
+          type?: string
           updated_at?: string
         }
         Relationships: []

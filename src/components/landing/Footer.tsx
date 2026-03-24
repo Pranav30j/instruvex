@@ -2,16 +2,16 @@ import { Link } from "react-router-dom";
 
 const footerLinks = {
   Product: [
-    { label: "Features", href: "#features" },
-    { label: "Academy", href: "#academy" },
-    { label: "Pricing", href: "#pricing" },
+    { label: "Features", href: "/#features" },
+    { label: "Academy", href: "/#academy" },
+    { label: "Pricing", href: "/#pricing" },
     { label: "Verify Certificate", href: "/verify" },
   ],
   Company: [
-    { label: "About", href: "#about" },
-    { label: "Blog", href: "#" },
-    { label: "Careers", href: "#" },
-    { label: "Contact", href: "#contact" },
+    { label: "About", href: "/about" },
+    { label: "Blog", href: "/blog" },
+    { label: "Careers", href: "/careers" },
+    { label: "Contact", href: "/contact" },
   ],
   Legal: [
     { label: "Privacy Policy", href: "#" },
@@ -45,9 +45,9 @@ const Footer = () => (
             <ul className="space-y-2">
               {links.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  <Link to={link.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

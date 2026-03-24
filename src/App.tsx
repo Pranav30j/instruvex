@@ -27,6 +27,11 @@ import CertificationsAdmin from "./pages/CertificationsAdmin";
 import VerifyPortal from "./pages/VerifyPortal";
 import InternCertVerify from "./pages/InternCertVerify";
 import RoleManagement from "./pages/RoleManagement";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Careers from "./pages/Careers";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +50,11 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route

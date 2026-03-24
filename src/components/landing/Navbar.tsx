@@ -5,10 +5,12 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Academy", href: "#academy" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Contact", href: "#contact" },
+  { label: "Features", href: "/#features" },
+  { label: "Academy", href: "/#academy" },
+  { label: "About", href: "/about" },
+  { label: "Blog", href: "/blog" },
+  { label: "Careers", href: "/careers" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const Navbar = () => {
@@ -28,13 +30,13 @@ const Navbar = () => {
 
         <div className="hidden items-center gap-8 md:flex">
           {navLinks.map((l) => (
-            <a
+            <Link
               key={l.label}
-              href={l.href}
+              to={l.href}
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               {l.label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -65,14 +67,14 @@ const Navbar = () => {
           >
             <div className="container mx-auto flex flex-col gap-4 px-4 py-6">
               {navLinks.map((l) => (
-                <a
+                <Link
                   key={l.label}
-                  href={l.href}
+                  to={l.href}
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                   onClick={() => setMobileOpen(false)}
                 >
                   {l.label}
-                </a>
+                </Link>
               ))}
               <div className="flex gap-3 pt-2">
                 <Link to="/login" className="flex-1">
