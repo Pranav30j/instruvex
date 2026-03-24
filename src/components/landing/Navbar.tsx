@@ -67,14 +67,14 @@ const Navbar = () => {
           >
             <div className="container mx-auto flex flex-col gap-4 px-4 py-6">
               {navLinks.map((l) => (
-                <a
+                <Link
                   key={l.label}
-                  href={l.href}
+                  to={l.href}
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                   onClick={() => setMobileOpen(false)}
                 >
                   {l.label}
-                </a>
+                </Link>
               ))}
               <div className="flex gap-3 pt-2">
                 <Link to="/login" className="flex-1">

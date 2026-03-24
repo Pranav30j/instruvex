@@ -45,9 +45,9 @@ const Footer = () => (
             <ul className="space-y-2">
               {links.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  <Link to={link.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
