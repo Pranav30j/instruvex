@@ -34,6 +34,9 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogManage from "./pages/BlogManage";
 import BlogEditor from "./pages/BlogEditor";
+import Assignments from "./pages/Assignments";
+import AssignmentCreate from "./pages/AssignmentCreate";
+import AssignmentDetail from "./pages/AssignmentDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -142,6 +145,18 @@ const App = () => (
             <Route
               path="/dashboard/blog/:postId/edit"
               element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin"]}><BlogEditor /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/assignments"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor", "student"]}><Assignments /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/assignments/create"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><AssignmentCreate /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/assignments/:assignmentId"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor", "student"]}><AssignmentDetail /></ProtectedRoute>}
             />
           </Routes>
         </AuthProvider>
