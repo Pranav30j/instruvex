@@ -131,6 +131,18 @@ const App = () => (
               path="/dashboard/roles"
               element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin"]}><RoleManagement /></ProtectedRoute>}
             />
+            <Route
+              path="/dashboard/blog"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin"]}><BlogManage /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/blog/new"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin"]}><BlogEditor /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/blog/:postId/edit"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin"]}><BlogEditor /></ProtectedRoute>}
+            />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
