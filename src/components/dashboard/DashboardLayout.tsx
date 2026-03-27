@@ -34,6 +34,7 @@ const allSidebarItems: SidebarItem[] = [
   { icon: Building2, label: "Institutions", path: "/dashboard/institutions", roles: ["super_admin", "institute_admin"] },
   { icon: GraduationCap, label: "Academy", path: "/dashboard/academy" },
   { icon: ShieldCheck, label: "User Roles", path: "/dashboard/roles", roles: ["super_admin", "institute_admin"] },
+  { icon: PenSquare, label: "Blog", path: "/dashboard/blog", roles: ["super_admin", "institute_admin"] },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
