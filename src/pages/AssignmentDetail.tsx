@@ -350,7 +350,4 @@ const AssignmentDetail = () => {
   );
 };
 
-// Need Send icon import
-import { Send } from "lucide-react";
-
 export default AssignmentDetail;
