@@ -34,6 +34,9 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogManage from "./pages/BlogManage";
 import BlogEditor from "./pages/BlogEditor";
+import Assignments from "./pages/Assignments";
+import AssignmentCreate from "./pages/AssignmentCreate";
+import AssignmentDetail from "./pages/AssignmentDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
