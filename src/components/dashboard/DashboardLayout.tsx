@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Bell, Building2, GraduationCap, ShieldCheck, ChevronDown,
+  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Bell, Building2, GraduationCap, ShieldCheck, ChevronDown, PenSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
@@ -34,6 +34,7 @@ const allSidebarItems: SidebarItem[] = [
   { icon: Building2, label: "Institutions", path: "/dashboard/institutions", roles: ["super_admin", "institute_admin"] },
   { icon: GraduationCap, label: "Academy", path: "/dashboard/academy" },
   { icon: ShieldCheck, label: "User Roles", path: "/dashboard/roles", roles: ["super_admin", "institute_admin"] },
+  { icon: PenSquare, label: "Blog", path: "/dashboard/blog", roles: ["super_admin", "institute_admin"] },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
