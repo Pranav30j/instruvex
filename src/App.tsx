@@ -32,6 +32,8 @@ import Contact from "./pages/Contact";
 import Careers from "./pages/Careers";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import BlogManage from "./pages/BlogManage";
+import BlogEditor from "./pages/BlogEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
