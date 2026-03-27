@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Calendar, Upload, Link as LinkIcon, Loader2, FileText, Eye, Download } from "lucide-react";
+import { ArrowLeft, Calendar, Upload, Link as LinkIcon, Loader2, FileText, Eye, Download, Send } from "lucide-react";
 import { format, isPast } from "date-fns";
 
 const AssignmentDetail = () => {
