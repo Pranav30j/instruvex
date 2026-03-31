@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import {
   CheckCircle2, XCircle, Clock, RotateCcw, Trophy, ArrowRight, ArrowLeft,
 } from "lucide-react";
+import { notifyQuizCompletion } from "@/lib/notifications";
 
 interface QuizTakerProps {
   quizId: string;
@@ -130,6 +131,11 @@ export default function QuizTaker({ quizId, onComplete }: QuizTakerProps) {
     } as any);
 
     queryClient.invalidateQueries({ queryKey: ["academy-quiz-attempts"] });
+
+    // Send in-app notification
+    if (user) {
+      notifyQuizCompletion(user.id, quiz?.title || "Quiz", passed, score, totalMarks);
+    }
 
     // If final exam and passed, generate certificate
     if (quiz?.is_final_exam && passed) {

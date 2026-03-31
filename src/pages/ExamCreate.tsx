@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { notifyStudentsOfExam } from "@/lib/notifications";
 
 type QuestionType = "mcq" | "subjective" | "coding";
 
@@ -155,6 +156,9 @@ const ExamCreate = () => {
     }
 
     toast({ title: `Exam ${status === "draft" ? "saved as draft" : "published"}!` });
+    if (status === "published") {
+      notifyStudentsOfExam(exam.id, exam.title);
+    }
     navigate("/dashboard/exams");
     setSaving(false);
   };
