@@ -109,6 +109,11 @@ const AssignmentDetail = () => {
       queryClient.invalidateQueries({ queryKey: ["my-submission", assignmentId] });
       queryClient.invalidateQueries({ queryKey: ["my-submissions"] });
       toast({ title: "Assignment submitted!" });
+      // Notify the assignment creator
+      if (assignment?.created_by) {
+        const studentName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "A student";
+        notifyInstructorOfSubmission(assignment.created_by, assignmentId!, assignment.title, studentName);
+      }
     },
     onError: (err: Error) => {
       setUploading(false);
