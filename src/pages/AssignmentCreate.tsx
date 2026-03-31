@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Save, Send, Loader2, Upload } from "lucide-react";
+import { notifyStudentsOfAssignment } from "@/lib/notifications";
 
 const AssignmentCreate = () => {
   const navigate = useNavigate();
