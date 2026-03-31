@@ -132,6 +132,11 @@ export default function QuizTaker({ quizId, onComplete }: QuizTakerProps) {
 
     queryClient.invalidateQueries({ queryKey: ["academy-quiz-attempts"] });
 
+    // Send in-app notification
+    if (user) {
+      notifyQuizCompletion(user.id, quiz?.title || "Quiz", passed, score, totalMarks);
+    }
+
     // If final exam and passed, generate certificate
     if (quiz?.is_final_exam && passed) {
       onComplete?.(true);

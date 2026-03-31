@@ -156,6 +156,9 @@ const ExamCreate = () => {
     }
 
     toast({ title: `Exam ${status === "draft" ? "saved as draft" : "published"}!` });
+    if (status === "published") {
+      notifyStudentsOfExam(exam.id, exam.title);
+    }
     navigate("/dashboard/exams");
     setSaving(false);
   };

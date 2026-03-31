@@ -54,3 +54,68 @@ export async function notifyInstructorOfSubmission(
     link: `/dashboard/assignments/${assignmentId}`,
   });
 }
+
+export async function notifyStudentsOfExam(examId: string, examTitle: string) {
+  const { data: studentRoles } = await supabase
+    .from("user_roles")
+    .select("user_id")
+    .eq("role", "student");
+
+  if (!studentRoles?.length) return;
+
+  const notifications = studentRoles.map((r) => ({
+    user_id: r.user_id,
+    title: "New Exam Published",
+    message: `A new exam "${examTitle}" is now available.`,
+    type: "exam",
+    link: `/dashboard/exams`,
+  }));
+
+  const { error } = await supabase.from("notifications").insert(notifications);
+  if (error) console.error("Failed to notify students of exam:", error);
+}
+
+export async function notifyExamCreatorOfSubmission(
+  creatorId: string,
+  examTitle: string,
+  studentName: string
+) {
+  await sendNotification({
+    userId: creatorId,
+    title: "Exam Submitted",
+    message: `${studentName} completed "${examTitle}".`,
+    type: "exam_submission",
+    link: `/dashboard/exams`,
+  });
+}
+
+export async function notifyQuizCompletion(
+  userId: string,
+  quizTitle: string,
+  passed: boolean,
+  score: number,
+  total: number
+) {
+  await sendNotification({
+    userId,
+    title: passed ? "Quiz Passed! 🎉" : "Quiz Completed",
+    message: `You scored ${score}/${total} on "${quizTitle}".${passed ? " Great job!" : " Try again!"}`,
+    type: "quiz",
+    link: `/dashboard/academy`,
+  });
+}
+
+export async function notifyStudentOfGrade(
+  studentId: string,
+  assignmentTitle: string,
+  marks: number,
+  assignmentId: string
+) {
+  await sendNotification({
+    userId: studentId,
+    title: "Assignment Graded",
+    message: `Your submission for "${assignmentTitle}" received ${marks} marks.`,
+    type: "grade",
+    link: `/dashboard/assignments/${assignmentId}`,
+  });
+}

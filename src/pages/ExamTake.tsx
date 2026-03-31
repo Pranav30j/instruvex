@@ -181,6 +181,12 @@ const ExamTake = () => {
     }).eq("id", submissionId);
 
     toast({ title: "Exam submitted!", description: `Auto-graded MCQ score: ${totalScore}` });
+    // Notify exam creator
+    if (exam?.created_by && user) {
+      const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", user.id).maybeSingle();
+      const studentName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "A student";
+      notifyExamCreatorOfSubmission(exam.created_by, exam.title, studentName);
+    }
     navigate("/dashboard/exams");
     setSubmitting(false);
   }, [submissionId, answers, questions, submitting]);
