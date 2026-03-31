@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Save, Send, Loader2, Upload } from "lucide-react";
+import { notifyStudentsOfAssignment } from "@/lib/notifications";
 
 const AssignmentCreate = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ const AssignmentCreate = () => {
         setUploading(false);
       }
 
-      const { error } = await supabase.from("assignments").insert({
+      const { data: insertedData, error } = await supabase.from("assignments").insert({
         title,
         description: description || null,
         course_id: courseId || null,
@@ -65,12 +66,16 @@ const AssignmentCreate = () => {
         max_marks: maxMarks ? Number(maxMarks) : null,
         attachment_url: attachmentUrl,
         status: publish ? "published" : "draft",
-      });
+      }).select("id, title").single();
       if (error) throw error;
+      return { publish, assignment: insertedData };
     },
-    onSuccess: (_, publish) => {
+    onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
-      toast({ title: publish ? "Assignment published!" : "Draft saved!" });
+      toast({ title: result.publish ? "Assignment published!" : "Draft saved!" });
+      if (result.publish && result.assignment) {
+        notifyStudentsOfAssignment(result.assignment.id, result.assignment.title);
+      }
       navigate("/dashboard/assignments");
     },
     onError: (err: Error) => {

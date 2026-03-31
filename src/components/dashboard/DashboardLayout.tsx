@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Bell, Building2, GraduationCap, ShieldCheck, ChevronDown, PenSquare, ClipboardList,
+  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Building2, GraduationCap, ShieldCheck, ChevronDown, PenSquare, ClipboardList,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import NotificationBell from "./NotificationBell";
 
 const ROLE_LABELS: Record<AppRole, string> = {
   super_admin: "Super Admin",
@@ -159,10 +160,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             ) : (
               <span className="hidden rounded-md bg-steel/10 px-2.5 py-1 text-xs text-steel sm:block">{displayRole}</span>
             )}
-            <button className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-navy-elevated hover:text-foreground">
-              <Bell size={18} />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-steel" />
-            </button>
+            <NotificationBell />
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-steel/20 text-sm font-medium text-steel">
               {initials}
             </div>

@@ -15,11 +15,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Calendar, Upload, Link as LinkIcon, Loader2, FileText, Eye, Download, Send } from "lucide-react";
 import { format, isPast } from "date-fns";
+import { notifyInstructorOfSubmission } from "@/lib/notifications";
 
 const AssignmentDetail = () => {
   const { assignmentId } = useParams<{ assignmentId: string }>();
   const navigate = useNavigate();
-  const { user, activeRole } = useAuth();
+  const { user, activeRole, profile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isCreator = activeRole && ["super_admin", "institute_admin", "instructor"].includes(activeRole);
@@ -108,6 +109,11 @@ const AssignmentDetail = () => {
       queryClient.invalidateQueries({ queryKey: ["my-submission", assignmentId] });
       queryClient.invalidateQueries({ queryKey: ["my-submissions"] });
       toast({ title: "Assignment submitted!" });
+      // Notify the assignment creator
+      if (assignment?.created_by) {
+        const studentName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "A student";
+        notifyInstructorOfSubmission(assignment.created_by, assignmentId!, assignment.title, studentName);
+      }
     },
     onError: (err: Error) => {
       setUploading(false);
