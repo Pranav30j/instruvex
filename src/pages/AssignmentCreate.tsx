@@ -69,9 +69,13 @@ const AssignmentCreate = () => {
       });
       if (error) throw error;
     },
-    onSuccess: (_, publish) => {
+    onSuccess: async (data, publish) => {
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
       toast({ title: publish ? "Assignment published!" : "Draft saved!" });
+      // Notify students when published
+      if (publish && data) {
+        notifyStudentsOfAssignment(data.id, data.title);
+      }
       navigate("/dashboard/assignments");
     },
     onError: (err: Error) => {

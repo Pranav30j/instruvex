@@ -160,10 +160,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             ) : (
               <span className="hidden rounded-md bg-steel/10 px-2.5 py-1 text-xs text-steel sm:block">{displayRole}</span>
             )}
-            <button className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-navy-elevated hover:text-foreground">
-              <Bell size={18} />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-steel" />
-            </button>
+            <NotificationBell />
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-steel/20 text-sm font-medium text-steel">
               {initials}
             </div>
