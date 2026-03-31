@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import {
   CheckCircle2, XCircle, Clock, RotateCcw, Trophy, ArrowRight, ArrowLeft,
 } from "lucide-react";
+import { notifyQuizCompletion } from "@/lib/notifications";
 
 interface QuizTakerProps {
   quizId: string;
