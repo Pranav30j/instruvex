@@ -57,7 +57,7 @@ const AssignmentCreate = () => {
         setUploading(false);
       }
 
-      const { error } = await supabase.from("assignments").insert({
+      const { data: insertedData, error } = await supabase.from("assignments").insert({
         title,
         description: description || null,
         course_id: courseId || null,
@@ -66,15 +66,15 @@ const AssignmentCreate = () => {
         max_marks: maxMarks ? Number(maxMarks) : null,
         attachment_url: attachmentUrl,
         status: publish ? "published" : "draft",
-      });
+      }).select("id, title").single();
       if (error) throw error;
+      return { publish, assignment: insertedData };
     },
-    onSuccess: async (data, publish) => {
+    onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
-      toast({ title: publish ? "Assignment published!" : "Draft saved!" });
-      // Notify students when published
-      if (publish && data) {
-        notifyStudentsOfAssignment(data.id, data.title);
+      toast({ title: result.publish ? "Assignment published!" : "Draft saved!" });
+      if (result.publish && result.assignment) {
+        notifyStudentsOfAssignment(result.assignment.id, result.assignment.title);
       }
       navigate("/dashboard/assignments");
     },

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Bell, Building2, GraduationCap, ShieldCheck, ChevronDown, PenSquare, ClipboardList,
+  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Building2, GraduationCap, ShieldCheck, ChevronDown, PenSquare, ClipboardList,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
