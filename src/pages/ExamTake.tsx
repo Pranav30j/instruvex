@@ -189,7 +189,7 @@ const ExamTake = () => {
     }
     navigate("/dashboard/exams");
     setSubmitting(false);
-  }, [submissionId, answers, questions, submitting]);
+  }, [submissionId, answers, questions, submitting, exam, user, toast, navigate]);
 
   if (loading) {
     return (
