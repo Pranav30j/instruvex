@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Calendar, Upload, Link as LinkIcon, Loader2, FileText, Eye, Download, Send } from "lucide-react";
 import { format, isPast } from "date-fns";
+import { notifyInstructorOfSubmission } from "@/lib/notifications";
 
 const AssignmentDetail = () => {
   const { assignmentId } = useParams<{ assignmentId: string }>();
