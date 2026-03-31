@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import NotificationBell from "./NotificationBell";
 
 const ROLE_LABELS: Record<AppRole, string> = {
   super_admin: "Super Admin",
