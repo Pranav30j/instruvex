@@ -20,7 +20,7 @@ import { notifyInstructorOfSubmission } from "@/lib/notifications";
 const AssignmentDetail = () => {
   const { assignmentId } = useParams<{ assignmentId: string }>();
   const navigate = useNavigate();
-  const { user, activeRole } = useAuth();
+  const { user, activeRole, profile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isCreator = activeRole && ["super_admin", "institute_admin", "instructor"].includes(activeRole);
