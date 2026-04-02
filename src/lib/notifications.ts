@@ -28,16 +28,15 @@ export async function notifyStudentsOfAssignment(assignmentId: string, assignmen
 
   if (!studentRoles?.length) return;
 
-  const notifications = studentRoles.map((r) => ({
-    user_id: r.user_id,
-    title: "New Assignment",
-    message: `A new assignment "${assignmentTitle}" has been posted.`,
-    type: "assignment",
-    link: `/dashboard/assignments/${assignmentId}`,
-  }));
-
-  const { error } = await supabase.from("notifications").insert(notifications);
-  if (error) console.error("Failed to notify students:", error);
+  for (const r of studentRoles) {
+    await sendNotification({
+      userId: r.user_id,
+      title: "New Assignment",
+      message: `A new assignment "${assignmentTitle}" has been posted.`,
+      type: "assignment",
+      link: `/dashboard/assignments/${assignmentId}`,
+    });
+  }
 }
 
 export async function notifyInstructorOfSubmission(
