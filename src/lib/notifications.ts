@@ -62,16 +62,15 @@ export async function notifyStudentsOfExam(examId: string, examTitle: string) {
 
   if (!studentRoles?.length) return;
 
-  const notifications = studentRoles.map((r) => ({
-    user_id: r.user_id,
-    title: "New Exam Published",
-    message: `A new exam "${examTitle}" is now available.`,
-    type: "exam",
-    link: `/dashboard/exams`,
-  }));
-
-  const { error } = await supabase.from("notifications").insert(notifications);
-  if (error) console.error("Failed to notify students of exam:", error);
+  for (const r of studentRoles) {
+    await sendNotification({
+      userId: r.user_id,
+      title: "New Exam Published",
+      message: `A new exam "${examTitle}" is now available.`,
+      type: "exam",
+      link: `/dashboard/exams`,
+    });
+  }
 }
 
 export async function notifyExamCreatorOfSubmission(
