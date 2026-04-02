@@ -1150,6 +1150,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "student_answers_selected_option_id_fkey"
+            columns: ["selected_option_id"]
+            isOneToOne: false
+            referencedRelation: "question_options_student"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "student_answers_submission_id_fkey"
             columns: ["submission_id"]
             isOneToOne: false
@@ -1184,7 +1191,35 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      question_options_student: {
+        Row: {
+          id: string | null
+          option_text: string | null
+          order_index: number | null
+          question_id: string | null
+        }
+        Insert: {
+          id?: string | null
+          option_text?: string | null
+          order_index?: number | null
+          question_id?: string | null
+        }
+        Update: {
+          id?: string | null
+          option_text?: string | null
+          order_index?: number | null
+          question_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       get_my_students: {

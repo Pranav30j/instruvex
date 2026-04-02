@@ -15,10 +15,10 @@ import {
 
 type Exam = Tables<"exams">;
 type Question = Tables<"questions">;
-type Option = Tables<"question_options">;
+type Option = Tables<"question_options_student">;
 
 interface QuestionWithOptions extends Question {
-  question_options: Option[];
+  question_options_student: Option[];
 }
 
 interface AnswerMap {
@@ -55,7 +55,7 @@ const ExamTake = () => {
 
       const { data: qData } = await supabase
         .from("questions")
-        .select("*, question_options(*)")
+        .select("*, question_options_student(*)")
         .eq("exam_id", examId)
         .order("order_index");
       if (qData) {
@@ -160,25 +160,15 @@ const ExamTake = () => {
       }
     }
 
-    // Auto-grade MCQs
-    let totalScore = 0;
-    for (const q of questions) {
-      if (q.question_type === "mcq") {
-        const ans = answers[q.id];
-        if (ans?.selected_option_id) {
-          const correctOpt = q.question_options.find((o) => o.is_correct);
-          if (correctOpt && correctOpt.id === ans.selected_option_id) {
-            totalScore += q.marks;
-          }
-        }
-      }
-    }
+    // Server-side grading via edge function
+    const { data: gradeResult, error: gradeError } = await supabase.functions.invoke("grade-exam", {
+      body: { submission_id: submissionId },
+    });
 
-    await supabase.from("exam_submissions").update({
-      status: "submitted",
-      submitted_at: new Date().toISOString(),
-      total_score: totalScore,
-    }).eq("id", submissionId);
+    const totalScore = gradeResult?.score ?? 0;
+    if (gradeError) {
+      console.error("Grading error:", gradeError);
+    }
 
     toast({ title: "Exam submitted!", description: `Auto-graded MCQ score: ${totalScore}` });
     // Notify exam creator
@@ -293,7 +283,7 @@ const ExamTake = () => {
               {/* MCQ */}
               {currentQ.question_type === "mcq" && (
                 <div className="space-y-2">
-                  {currentQ.question_options
+                  {(currentQ.question_options_student || [])
                     .sort((a, b) => a.order_index - b.order_index)
                     .map((opt) => {
                       const selected = answers[currentQ.id]?.selected_option_id === opt.id;
