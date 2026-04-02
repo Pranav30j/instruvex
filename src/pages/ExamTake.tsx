@@ -55,7 +55,7 @@ const ExamTake = () => {
 
       const { data: qData } = await supabase
         .from("questions")
-        .select("*, question_options(*)")
+        .select("*, question_options_student(*)")
         .eq("exam_id", examId)
         .order("order_index");
       if (qData) {
