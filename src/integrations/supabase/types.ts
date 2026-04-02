@@ -1051,6 +1051,13 @@ export type Database = {
             referencedRelation: "questions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "question_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_student"
+            referencedColumns: ["id"]
+          },
         ]
       }
       questions: {
@@ -1143,6 +1150,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "student_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_student"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "student_answers_selected_option_id_fkey"
             columns: ["selected_option_id"]
             isOneToOne: false
@@ -1191,6 +1205,35 @@ export type Database = {
       }
     }
     Views: {
+      academy_quiz_options_student: {
+        Row: {
+          id: string | null
+          option_text: string | null
+          order_index: number | null
+          question_id: string | null
+        }
+        Insert: {
+          id?: string | null
+          option_text?: string | null
+          order_index?: number | null
+          question_id?: string | null
+        }
+        Update: {
+          id?: string | null
+          option_text?: string | null
+          order_index?: number | null
+          question_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_quiz_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "academy_quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       question_options_student: {
         Row: {
           id: string | null
@@ -1218,10 +1261,71 @@ export type Database = {
             referencedRelation: "questions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "question_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_student"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions_student: {
+        Row: {
+          code_language: string | null
+          code_template: string | null
+          created_at: string | null
+          exam_id: string | null
+          id: string | null
+          marks: number | null
+          order_index: number | null
+          question_text: string | null
+          question_type: Database["public"]["Enums"]["question_type"] | null
+        }
+        Insert: {
+          code_language?: string | null
+          code_template?: string | null
+          created_at?: string | null
+          exam_id?: string | null
+          id?: string | null
+          marks?: number | null
+          order_index?: number | null
+          question_text?: string | null
+          question_type?: Database["public"]["Enums"]["question_type"] | null
+        }
+        Update: {
+          code_language?: string | null
+          code_template?: string | null
+          created_at?: string | null
+          exam_id?: string | null
+          id?: string | null
+          marks?: number | null
+          order_index?: number | null
+          question_text?: string | null
+          question_type?: Database["public"]["Enums"]["question_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Functions: {
+      create_notification: {
+        Args: {
+          _link?: string
+          _message: string
+          _title: string
+          _type?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       get_my_students: {
         Args: { _creator_id: string }
         Returns: {
