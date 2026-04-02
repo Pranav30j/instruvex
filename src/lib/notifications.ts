@@ -9,12 +9,12 @@ interface NotifyParams {
 }
 
 export async function sendNotification({ userId, title, message, type = "info", link }: NotifyParams) {
-  const { error } = await supabase.from("notifications").insert({
-    user_id: userId,
-    title,
-    message,
-    type,
-    link: link || null,
+  const { error } = await supabase.rpc("create_notification", {
+    _user_id: userId,
+    _title: title,
+    _message: message,
+    _type: type,
+    _link: link || null,
   });
   if (error) console.error("Failed to send notification:", error);
 }
@@ -28,16 +28,15 @@ export async function notifyStudentsOfAssignment(assignmentId: string, assignmen
 
   if (!studentRoles?.length) return;
 
-  const notifications = studentRoles.map((r) => ({
-    user_id: r.user_id,
-    title: "New Assignment",
-    message: `A new assignment "${assignmentTitle}" has been posted.`,
-    type: "assignment",
-    link: `/dashboard/assignments/${assignmentId}`,
-  }));
-
-  const { error } = await supabase.from("notifications").insert(notifications);
-  if (error) console.error("Failed to notify students:", error);
+  for (const r of studentRoles) {
+    await sendNotification({
+      userId: r.user_id,
+      title: "New Assignment",
+      message: `A new assignment "${assignmentTitle}" has been posted.`,
+      type: "assignment",
+      link: `/dashboard/assignments/${assignmentId}`,
+    });
+  }
 }
 
 export async function notifyInstructorOfSubmission(
@@ -63,16 +62,15 @@ export async function notifyStudentsOfExam(examId: string, examTitle: string) {
 
   if (!studentRoles?.length) return;
 
-  const notifications = studentRoles.map((r) => ({
-    user_id: r.user_id,
-    title: "New Exam Published",
-    message: `A new exam "${examTitle}" is now available.`,
-    type: "exam",
-    link: `/dashboard/exams`,
-  }));
-
-  const { error } = await supabase.from("notifications").insert(notifications);
-  if (error) console.error("Failed to notify students of exam:", error);
+  for (const r of studentRoles) {
+    await sendNotification({
+      userId: r.user_id,
+      title: "New Exam Published",
+      message: `A new exam "${examTitle}" is now available.`,
+      type: "exam",
+      link: `/dashboard/exams`,
+    });
+  }
 }
 
 export async function notifyExamCreatorOfSubmission(
