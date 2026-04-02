@@ -9,12 +9,12 @@ interface NotifyParams {
 }
 
 export async function sendNotification({ userId, title, message, type = "info", link }: NotifyParams) {
-  const { error } = await supabase.from("notifications").insert({
-    user_id: userId,
-    title,
-    message,
-    type,
-    link: link || null,
+  const { error } = await supabase.rpc("create_notification", {
+    _user_id: userId,
+    _title: title,
+    _message: message,
+    _type: type,
+    _link: link || null,
   });
   if (error) console.error("Failed to send notification:", error);
 }
