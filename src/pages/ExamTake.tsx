@@ -15,10 +15,10 @@ import {
 
 type Exam = Tables<"exams">;
 type Question = Tables<"questions">;
-type Option = Tables<"question_options">;
+type Option = Tables<"question_options_student">;
 
 interface QuestionWithOptions extends Question {
-  question_options: Option[];
+  question_options_student: Option[];
 }
 
 interface AnswerMap {
