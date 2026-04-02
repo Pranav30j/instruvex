@@ -283,7 +283,7 @@ const ExamTake = () => {
               {/* MCQ */}
               {currentQ.question_type === "mcq" && (
                 <div className="space-y-2">
-                  {currentQ.question_options
+                  {(currentQ.question_options_student || [])
                     .sort((a, b) => a.order_index - b.order_index)
                     .map((opt) => {
                       const selected = answers[currentQ.id]?.selected_option_id === opt.id;
