@@ -160,25 +160,15 @@ const ExamTake = () => {
       }
     }
 
-    // Auto-grade MCQs
-    let totalScore = 0;
-    for (const q of questions) {
-      if (q.question_type === "mcq") {
-        const ans = answers[q.id];
-        if (ans?.selected_option_id) {
-          const correctOpt = q.question_options.find((o) => o.is_correct);
-          if (correctOpt && correctOpt.id === ans.selected_option_id) {
-            totalScore += q.marks;
-          }
-        }
-      }
-    }
+    // Server-side grading via edge function
+    const { data: gradeResult, error: gradeError } = await supabase.functions.invoke("grade-exam", {
+      body: { submission_id: submissionId },
+    });
 
-    await supabase.from("exam_submissions").update({
-      status: "submitted",
-      submitted_at: new Date().toISOString(),
-      total_score: totalScore,
-    }).eq("id", submissionId);
+    const totalScore = gradeResult?.score ?? 0;
+    if (gradeError) {
+      console.error("Grading error:", gradeError);
+    }
 
     toast({ title: "Exam submitted!", description: `Auto-graded MCQ score: ${totalScore}` });
     // Notify exam creator
