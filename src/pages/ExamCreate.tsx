@@ -120,7 +120,7 @@ const ExamCreate = () => {
                   parent_question_id: parentQ.id,
                   expected_answer: sub.expected_answer || null,
                   keywords: sub.keywords.length ? sub.keywords : null,
-                })
+                } as any)
                 .select()
                 .single();
 
