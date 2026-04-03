@@ -155,7 +155,7 @@ const ExamCreate = () => {
               constraints_text: q.question_type === "coding" ? q.constraints_text || null : null,
               evaluation_criteria: q.question_type === "long_answer" ? q.evaluation_criteria || null : null,
               keywords: q.question_type === "short_answer" && q.keywords.length ? q.keywords : null,
-            })
+            } as any)
             .select()
             .single();
 
