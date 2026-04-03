@@ -1064,38 +1064,65 @@ export type Database = {
         Row: {
           code_language: string | null
           code_template: string | null
+          constraints_text: string | null
           created_at: string
+          evaluation_criteria: string | null
           exam_id: string
           expected_answer: string | null
+          hidden_test_cases: Json | null
           id: string
+          input_format: string | null
+          keywords: string[] | null
           marks: number
           order_index: number
+          output_format: string | null
+          parent_question_id: string | null
           question_text: string
           question_type: Database["public"]["Enums"]["question_type"]
+          scenario_text: string | null
+          test_cases: Json | null
         }
         Insert: {
           code_language?: string | null
           code_template?: string | null
+          constraints_text?: string | null
           created_at?: string
+          evaluation_criteria?: string | null
           exam_id: string
           expected_answer?: string | null
+          hidden_test_cases?: Json | null
           id?: string
+          input_format?: string | null
+          keywords?: string[] | null
           marks?: number
           order_index?: number
+          output_format?: string | null
+          parent_question_id?: string | null
           question_text: string
           question_type?: Database["public"]["Enums"]["question_type"]
+          scenario_text?: string | null
+          test_cases?: Json | null
         }
         Update: {
           code_language?: string | null
           code_template?: string | null
+          constraints_text?: string | null
           created_at?: string
+          evaluation_criteria?: string | null
           exam_id?: string
           expected_answer?: string | null
+          hidden_test_cases?: Json | null
           id?: string
+          input_format?: string | null
+          keywords?: string[] | null
           marks?: number
           order_index?: number
+          output_format?: string | null
+          parent_question_id?: string | null
           question_text?: string
           question_type?: Database["public"]["Enums"]["question_type"]
+          scenario_text?: string | null
+          test_cases?: Json | null
         }
         Relationships: [
           {
@@ -1103,6 +1130,20 @@ export type Database = {
             columns: ["exam_id"]
             isOneToOne: false
             referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_parent_question_id_fkey"
+            columns: ["parent_question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_parent_question_id_fkey"
+            columns: ["parent_question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_student"
             referencedColumns: ["id"]
           },
         ]
@@ -1274,35 +1315,53 @@ export type Database = {
         Row: {
           code_language: string | null
           code_template: string | null
+          constraints_text: string | null
           created_at: string | null
           exam_id: string | null
           id: string | null
+          input_format: string | null
           marks: number | null
           order_index: number | null
+          output_format: string | null
+          parent_question_id: string | null
           question_text: string | null
           question_type: Database["public"]["Enums"]["question_type"] | null
+          scenario_text: string | null
+          test_cases: Json | null
         }
         Insert: {
           code_language?: string | null
           code_template?: string | null
+          constraints_text?: string | null
           created_at?: string | null
           exam_id?: string | null
           id?: string | null
+          input_format?: string | null
           marks?: number | null
           order_index?: number | null
+          output_format?: string | null
+          parent_question_id?: string | null
           question_text?: string | null
           question_type?: Database["public"]["Enums"]["question_type"] | null
+          scenario_text?: string | null
+          test_cases?: Json | null
         }
         Update: {
           code_language?: string | null
           code_template?: string | null
+          constraints_text?: string | null
           created_at?: string | null
           exam_id?: string | null
           id?: string | null
+          input_format?: string | null
           marks?: number | null
           order_index?: number | null
+          output_format?: string | null
+          parent_question_id?: string | null
           question_text?: string | null
           question_type?: Database["public"]["Enums"]["question_type"] | null
+          scenario_text?: string | null
+          test_cases?: Json | null
         }
         Relationships: [
           {
@@ -1310,6 +1369,20 @@ export type Database = {
             columns: ["exam_id"]
             isOneToOne: false
             referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_parent_question_id_fkey"
+            columns: ["parent_question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_parent_question_id_fkey"
+            columns: ["parent_question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_student"
             referencedColumns: ["id"]
           },
         ]
@@ -1359,7 +1432,13 @@ export type Database = {
         | "student"
         | "academy_learner"
       exam_status: "draft" | "published" | "active" | "completed" | "archived"
-      question_type: "mcq" | "subjective" | "coding"
+      question_type:
+        | "mcq"
+        | "subjective"
+        | "coding"
+        | "case_study"
+        | "short_answer"
+        | "long_answer"
       submission_status: "in_progress" | "submitted" | "graded"
     }
     CompositeTypes: {
@@ -1496,7 +1575,14 @@ export const Constants = {
         "academy_learner",
       ],
       exam_status: ["draft", "published", "active", "completed", "archived"],
-      question_type: ["mcq", "subjective", "coding"],
+      question_type: [
+        "mcq",
+        "subjective",
+        "coding",
+        "case_study",
+        "short_answer",
+        "long_answer",
+      ],
       submission_status: ["in_progress", "submitted", "graded"],
     },
   },
