@@ -1,355 +1,325 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, GripVertical, Code, AlignLeft, ListChecks } from "lucide-react";
+import { ArrowLeft, ArrowRight, ListChecks, AlignLeft, Code, BookOpen, Type, Plus } from "lucide-react";
 import AIQuestionGenerator from "@/components/exam/AIQuestionGenerator";
+import ExamStepBasicInfo, { ExamBasicInfo } from "@/components/exam/ExamStepBasicInfo";
+import QuestionEditor, { QuestionDraft, QuestionType, newQuestion } from "@/components/exam/QuestionEditor";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { notifyStudentsOfExam } from "@/lib/notifications";
 
-type QuestionType = "mcq" | "subjective" | "coding";
-
-interface QuestionOption {
-  id: string;
-  option_text: string;
-  is_correct: boolean;
-}
-
-interface QuestionDraft {
-  id: string;
-  question_type: QuestionType;
-  question_text: string;
-  marks: number;
-  options: QuestionOption[];
-  expected_answer: string;
-  code_template: string;
-  code_language: string;
-}
-
-const newOption = (): QuestionOption => ({ id: crypto.randomUUID(), option_text: "", is_correct: false });
-
-const newQuestion = (type: QuestionType = "mcq"): QuestionDraft => ({
-  id: crypto.randomUUID(),
-  question_type: type,
-  question_text: "",
-  marks: 1,
-  options: type === "mcq" ? [newOption(), newOption(), newOption(), newOption()] : [],
-  expected_answer: "",
-  code_template: "",
-  code_language: "javascript",
-});
-
-const questionTypeIcon: Record<QuestionType, React.ReactNode> = {
-  mcq: <ListChecks size={16} />,
-  subjective: <AlignLeft size={16} />,
-  coding: <Code size={16} />,
-};
+const MAX_QUESTIONS = 100;
 
 const ExamCreate = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+  const [step, setStep] = useState<1 | 2>(1);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [duration, setDuration] = useState(60);
-  const [passingMarks, setPassingMarks] = useState(0);
-  const [shuffleQuestions, setShuffleQuestions] = useState(false);
-  const [showResults, setShowResults] = useState(true);
+  const [basicInfo, setBasicInfo] = useState<ExamBasicInfo>({
+    title: "",
+    description: "",
+    duration: 60,
+    passingMarks: 0,
+    shuffleQuestions: false,
+    showResults: true,
+    examType: "practice",
+  });
+
   const [questions, setQuestions] = useState<QuestionDraft[]>([newQuestion()]);
 
-  const totalMarks = questions.reduce((sum, q) => sum + q.marks, 0);
+  // Count all questions including sub-questions
+  const countQuestions = (qs: QuestionDraft[]): number =>
+    qs.reduce((sum, q) => sum + (q.question_type === "case_study" ? q.sub_questions.length : 1), 0);
+
+  const questionCount = countQuestions(questions);
+  const totalMarks = questions.reduce((sum, q) => {
+    if (q.question_type === "case_study") return sum + q.sub_questions.reduce((s, sq) => s + sq.marks, 0);
+    return sum + q.marks;
+  }, 0);
 
   const updateQuestion = (idx: number, updates: Partial<QuestionDraft>) => {
     setQuestions((prev) => prev.map((q, i) => (i === idx ? { ...q, ...updates } : q)));
   };
 
-  const updateOption = (qIdx: number, oIdx: number, updates: Partial<QuestionOption>) => {
-    setQuestions((prev) =>
-      prev.map((q, i) =>
-        i === qIdx ? { ...q, options: q.options.map((o, j) => (j === oIdx ? { ...o, ...updates } : o)) } : q
-      )
-    );
+  const addQuestion = (type: QuestionType) => {
+    if (questionCount >= MAX_QUESTIONS) {
+      toast({ title: `Maximum ${MAX_QUESTIONS} questions reached`, variant: "destructive" });
+      return;
+    }
+    setQuestions((prev) => [...prev, newQuestion(type)]);
   };
 
-  const setCorrectOption = (qIdx: number, oIdx: number) => {
-    setQuestions((prev) =>
-      prev.map((q, i) =>
-        i === qIdx ? { ...q, options: q.options.map((o, j) => ({ ...o, is_correct: j === oIdx })) } : q
-      )
-    );
-  };
-
-  const addQuestion = (type: QuestionType) => setQuestions((prev) => [...prev, newQuestion(type)]);
   const removeQuestion = (idx: number) => setQuestions((prev) => prev.filter((_, i) => i !== idx));
-  const addOption = (qIdx: number) =>
-    setQuestions((prev) => prev.map((q, i) => (i === qIdx ? { ...q, options: [...q.options, newOption()] } : q)));
-  const removeOption = (qIdx: number, oIdx: number) =>
-    setQuestions((prev) => prev.map((q, i) => (i === qIdx ? { ...q, options: q.options.filter((_, j) => j !== oIdx) } : q)));
 
   const handleSave = async (status: "draft" | "published" = "draft") => {
-    if (!title.trim()) { toast({ title: "Title required", variant: "destructive" }); return; }
-    if (questions.some((q) => !q.question_text.trim())) { toast({ title: "All questions need text", variant: "destructive" }); return; }
+    if (!basicInfo.title.trim()) { toast({ title: "Title required", variant: "destructive" }); return; }
+    if (questions.some((q) => q.question_type !== "case_study" && !q.question_text.trim())) {
+      toast({ title: "All questions need text", variant: "destructive" });
+      return;
+    }
     if (!user) return;
     setSaving(true);
 
-    const { data: exam, error: examError } = await supabase
-      .from("exams")
-      .insert({
-        title: title.trim(),
-        description: description.trim() || null,
-        created_by: user.id,
-        duration_minutes: duration,
-        total_marks: totalMarks,
-        passing_marks: passingMarks,
-        shuffle_questions: shuffleQuestions,
-        show_results: showResults,
-        status,
-      })
-      .select()
-      .single();
-
-    if (examError || !exam) {
-      toast({ title: "Failed to create exam", description: examError?.message, variant: "destructive" });
-      setSaving(false);
-      return;
-    }
-
-    // Insert questions
-    for (let i = 0; i < questions.length; i++) {
-      const q = questions[i];
-      const { data: qData, error: qError } = await supabase
-        .from("questions")
+    try {
+      const { data: exam, error: examError } = await supabase
+        .from("exams")
         .insert({
-          exam_id: exam.id,
-          question_type: q.question_type,
-          question_text: q.question_text.trim(),
-          marks: q.marks,
-          order_index: i,
-          code_template: q.question_type === "coding" ? q.code_template || null : null,
-          code_language: q.question_type === "coding" ? q.code_language || null : null,
-          expected_answer: q.question_type === "subjective" ? q.expected_answer || null : null,
+          title: basicInfo.title.trim(),
+          description: basicInfo.description.trim() || null,
+          created_by: user.id,
+          duration_minutes: basicInfo.duration,
+          total_marks: totalMarks,
+          passing_marks: basicInfo.passingMarks,
+          shuffle_questions: basicInfo.shuffleQuestions,
+          show_results: basicInfo.showResults,
+          status,
         })
         .select()
         .single();
 
-      if (qError || !qData) continue;
-
-      if (q.question_type === "mcq" && q.options.length > 0) {
-        await supabase.from("question_options").insert(
-          q.options.map((o, j) => ({
-            question_id: qData.id,
-            option_text: o.option_text.trim(),
-            is_correct: o.is_correct,
-            order_index: j,
-          }))
-        );
+      if (examError || !exam) {
+        toast({ title: "Failed to create exam", description: examError?.message, variant: "destructive" });
+        setSaving(false);
+        return;
       }
-    }
 
-    toast({ title: `Exam ${status === "draft" ? "saved as draft" : "published"}!` });
-    if (status === "published") {
-      notifyStudentsOfExam(exam.id, exam.title);
+      // Insert questions
+      let orderIdx = 0;
+      for (const q of questions) {
+        if (q.question_type === "case_study") {
+          // Insert parent case study
+          const { data: parentQ } = await supabase
+            .from("questions")
+            .insert({
+              exam_id: exam.id,
+              question_type: "case_study" as any,
+              question_text: q.scenario_text || "Case Study",
+              marks: 0,
+              order_index: orderIdx++,
+              scenario_text: q.scenario_text,
+            } as any)
+            .select()
+            .single();
+
+          if (parentQ) {
+            for (let si = 0; si < q.sub_questions.length; si++) {
+              const sub = q.sub_questions[si];
+              const { data: subQ } = await supabase
+                .from("questions")
+                .insert({
+                  exam_id: exam.id,
+                  question_type: sub.question_type as any,
+                  question_text: sub.question_text.trim(),
+                  marks: sub.marks,
+                  order_index: orderIdx++,
+                  parent_question_id: parentQ.id,
+                  expected_answer: sub.expected_answer || null,
+                  keywords: sub.keywords.length ? sub.keywords : null,
+                } as any)
+                .select()
+                .single();
+
+              if (subQ && sub.question_type === "mcq" && sub.options.length > 0) {
+                await supabase.from("question_options").insert(
+                  sub.options.map((o, j) => ({
+                    question_id: subQ.id,
+                    option_text: o.option_text.trim(),
+                    is_correct: o.is_correct,
+                    order_index: j,
+                  }))
+                );
+              }
+            }
+          }
+        } else {
+          const { data: qData } = await supabase
+            .from("questions")
+            .insert({
+              exam_id: exam.id,
+              question_type: q.question_type as any,
+              question_text: q.question_text.trim(),
+              marks: q.marks,
+              order_index: orderIdx++,
+              code_template: q.question_type === "coding" ? q.code_template || null : null,
+              code_language: q.question_type === "coding" ? q.code_language || null : null,
+              expected_answer: ["short_answer", "long_answer"].includes(q.question_type) ? q.expected_answer || null : null,
+              test_cases: q.question_type === "coding" ? q.test_cases.filter((t) => !t.is_hidden) : null,
+              hidden_test_cases: q.question_type === "coding" ? q.test_cases.filter((t) => t.is_hidden) : null,
+              input_format: q.question_type === "coding" ? q.input_format || null : null,
+              output_format: q.question_type === "coding" ? q.output_format || null : null,
+              constraints_text: q.question_type === "coding" ? q.constraints_text || null : null,
+              evaluation_criteria: q.question_type === "long_answer" ? q.evaluation_criteria || null : null,
+              keywords: q.question_type === "short_answer" && q.keywords.length ? q.keywords : null,
+            } as any)
+            .select()
+            .single();
+
+          if (qData && q.question_type === "mcq" && q.options.length > 0) {
+            await supabase.from("question_options").insert(
+              q.options.map((o, j) => ({
+                question_id: qData.id,
+                option_text: o.option_text.trim(),
+                is_correct: o.is_correct,
+                order_index: j,
+              }))
+            );
+          }
+        }
+      }
+
+      toast({ title: `Exam ${status === "draft" ? "saved as draft" : "published"}!` });
+      if (status === "published") notifyStudentsOfExam(exam.id, exam.title);
+      navigate("/dashboard/exams");
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
-    navigate("/dashboard/exams");
-    setSaving(false);
   };
 
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto">
+        {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard/exams")}><ArrowLeft size={18} /></Button>
-          <div>
+          <div className="flex-1">
             <h1 className="font-display text-2xl font-bold text-foreground">Create Exam</h1>
-            <p className="text-sm text-muted-foreground">Total marks: {totalMarks}</p>
+            <p className="text-sm text-muted-foreground">
+              {step === 1 ? "Step 1: Basic Information" : `Step 2: Questions (${questionCount}/${MAX_QUESTIONS}) • Total: ${totalMarks} marks`}
+            </p>
           </div>
         </div>
 
-        {/* Exam details */}
-        <div className="rounded-xl border border-border bg-card-gradient p-6 shadow-card mb-6">
-          <h2 className="font-display text-lg font-semibold text-foreground mb-4">Exam Details</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <Label>Title</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Midterm Data Structures" className="mt-1" />
-            </div>
-            <div className="sm:col-span-2">
-              <Label>Description</Label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description..." className="mt-1" rows={3} />
-            </div>
-            <div>
-              <Label>Duration (minutes)</Label>
-              <Input type="number" value={duration} onChange={(e) => setDuration(Number(e.target.value))} min={1} className="mt-1" />
-            </div>
-            <div>
-              <Label>Passing Marks</Label>
-              <Input type="number" value={passingMarks} onChange={(e) => setPassingMarks(Number(e.target.value))} min={0} className="mt-1" />
-            </div>
-            <div className="flex items-center gap-3">
-              <Switch checked={shuffleQuestions} onCheckedChange={setShuffleQuestions} />
-              <Label>Shuffle Questions</Label>
-            </div>
-            <div className="flex items-center gap-3">
-              <Switch checked={showResults} onCheckedChange={setShowResults} />
-              <Label>Show Results to Students</Label>
-            </div>
+        {/* Step indicator */}
+        <div className="flex items-center gap-2 mb-6">
+          <div className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium ${step === 1 ? "bg-steel text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+            1. Basic Info
+          </div>
+          <ArrowRight size={16} className="text-muted-foreground" />
+          <div className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium ${step === 2 ? "bg-steel text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+            2. Questions
           </div>
         </div>
 
-        {/* Questions */}
-        <div className="space-y-4 mb-6">
-          {questions.map((q, qIdx) => (
-            <div key={q.id} className="rounded-xl border border-border bg-card-gradient p-6 shadow-card">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <GripVertical size={16} className="text-muted-foreground" />
-                  <span className="text-sm font-medium text-steel">Q{qIdx + 1}</span>
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground border border-border rounded px-2 py-0.5">
-                    {questionTypeIcon[q.question_type]} {q.question_type.toUpperCase()}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Label className="text-xs">Marks:</Label>
-                    <Input type="number" value={q.marks} onChange={(e) => updateQuestion(qIdx, { marks: Number(e.target.value) })} min={0} className="w-16 h-8 text-xs" />
-                  </div>
-                  {questions.length > 1 && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeQuestion(qIdx)}>
-                      <Trash2 size={14} />
-                    </Button>
-                  )}
-                </div>
+        {step === 1 && (
+          <>
+            <ExamStepBasicInfo info={basicInfo} onChange={(u) => setBasicInfo((prev) => ({ ...prev, ...u }))} />
+            <div className="flex justify-end mt-6">
+              <Button variant="hero" onClick={() => {
+                if (!basicInfo.title.trim()) { toast({ title: "Enter a title first", variant: "destructive" }); return; }
+                setStep(2);
+              }}>
+                Next: Add Questions <ArrowRight size={16} />
+              </Button>
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            {/* Question counter bar */}
+            <div className="rounded-lg border border-border bg-card-gradient p-3 mb-4 flex items-center justify-between">
+              <span className="text-sm font-medium text-foreground">
+                Questions Added: <span className="text-steel">{questionCount}</span> / {MAX_QUESTIONS}
+              </span>
+              <div className="w-48 h-2 bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-steel rounded-full transition-all" style={{ width: `${(questionCount / MAX_QUESTIONS) * 100}%` }} />
               </div>
-
-              <Textarea
-                value={q.question_text}
-                onChange={(e) => updateQuestion(qIdx, { question_text: e.target.value })}
-                placeholder="Enter question text..."
-                className="mb-4"
-                rows={2}
-              />
-
-              {/* MCQ Options */}
-              {q.question_type === "mcq" && (
-                <div className="space-y-2">
-                  {q.options.map((opt, oIdx) => (
-                    <div key={opt.id} className="flex items-center gap-2">
-                      <button
-                        onClick={() => setCorrectOption(qIdx, oIdx)}
-                        className={`h-5 w-5 shrink-0 rounded-full border-2 transition-colors ${
-                          opt.is_correct ? "border-success bg-success" : "border-muted-foreground"
-                        }`}
-                      />
-                      <Input
-                        value={opt.option_text}
-                        onChange={(e) => updateOption(qIdx, oIdx, { option_text: e.target.value })}
-                        placeholder={`Option ${oIdx + 1}`}
-                        className="flex-1"
-                      />
-                      {q.options.length > 2 && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeOption(qIdx, oIdx)}>
-                          <Trash2 size={12} />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  <Button variant="ghost" size="sm" onClick={() => addOption(qIdx)} className="text-xs">
-                    <Plus size={14} /> Add Option
-                  </Button>
-                </div>
-              )}
-
-              {/* Subjective */}
-              {q.question_type === "subjective" && (
-                <div>
-                  <Label className="text-xs text-muted-foreground">Expected Answer (for auto-grading reference)</Label>
-                  <Textarea
-                    value={q.expected_answer}
-                    onChange={(e) => updateQuestion(qIdx, { expected_answer: e.target.value })}
-                    placeholder="Model answer..."
-                    className="mt-1"
-                    rows={3}
-                  />
-                </div>
-              )}
-
-              {/* Coding */}
-              {q.question_type === "coding" && (
-                <div className="space-y-3">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Language</Label>
-                    <Select value={q.code_language} onValueChange={(v) => updateQuestion(qIdx, { code_language: v })}>
-                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="javascript">JavaScript</SelectItem>
-                        <SelectItem value="python">Python</SelectItem>
-                        <SelectItem value="java">Java</SelectItem>
-                        <SelectItem value="cpp">C++</SelectItem>
-                        <SelectItem value="c">C</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Code Template</Label>
-                    <Textarea
-                      value={q.code_template}
-                      onChange={(e) => updateQuestion(qIdx, { code_template: e.target.value })}
-                      placeholder="// Starter code for the student..."
-                      className="mt-1 font-mono text-sm"
-                      rows={5}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
-          ))}
-        </div>
 
-        {/* Add question buttons */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <Button variant="outline" onClick={() => addQuestion("mcq")}><ListChecks size={16} /> Add MCQ</Button>
-          <Button variant="outline" onClick={() => addQuestion("subjective")}><AlignLeft size={16} /> Add Subjective</Button>
-          <Button variant="outline" onClick={() => addQuestion("coding")}><Code size={16} /> Add Coding</Button>
-          <AIQuestionGenerator
-            onQuestionsGenerated={(generated) => {
-              const newQuestions = generated.map((g) => ({
-                id: crypto.randomUUID(),
-                question_type: "mcq" as QuestionType,
-                question_text: g.question_text,
-                marks: g.marks || 1,
-                options: g.options.map((o) => ({
-                  id: crypto.randomUUID(),
-                  option_text: o.option_text,
-                  is_correct: o.is_correct,
-                })),
-                expected_answer: "",
-                code_template: "",
-                code_language: "javascript",
-              }));
-              setQuestions((prev) => [...prev, ...newQuestions]);
-            }}
-          />
-        </div>
+            {/* Questions */}
+            <div className="space-y-4 mb-6">
+              {questions.map((q, idx) => (
+                <QuestionEditor
+                  key={q.id}
+                  question={q}
+                  index={idx}
+                  canDelete={questions.length > 1}
+                  onUpdate={(updates) => updateQuestion(idx, updates)}
+                  onRemove={() => removeQuestion(idx)}
+                />
+              ))}
+            </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-3 border-t border-border pt-6">
-          <Button variant="hero" size="lg" onClick={() => handleSave("published")} disabled={saving}>
-            {saving ? "Saving..." : "Publish Exam"}
-          </Button>
-          <Button variant="outline" size="lg" onClick={() => handleSave("draft")} disabled={saving}>
-            Save as Draft
-          </Button>
-          <Button variant="ghost" size="lg" onClick={() => navigate("/dashboard/exams")}>Cancel</Button>
-        </div>
+            {/* Add question buttons */}
+            <div className="flex flex-wrap gap-2 mb-8">
+              <Button variant="outline" size="sm" onClick={() => addQuestion("mcq")}><ListChecks size={16} /> MCQ</Button>
+              <Button variant="outline" size="sm" onClick={() => addQuestion("short_answer")}><Type size={16} /> Short Answer</Button>
+              <Button variant="outline" size="sm" onClick={() => addQuestion("long_answer")}><AlignLeft size={16} /> Long Answer</Button>
+              <Button variant="outline" size="sm" onClick={() => addQuestion("coding")}><Code size={16} /> Coding</Button>
+              <Button variant="outline" size="sm" onClick={() => addQuestion("case_study")}><BookOpen size={16} /> Case Study</Button>
+              <AIQuestionGenerator
+                onQuestionsGenerated={(generated) => {
+                  const newQuestions: QuestionDraft[] = generated.map((g: any) => ({
+                    id: crypto.randomUUID(),
+                    question_type: g.question_type || "mcq",
+                    question_text: g.question_text,
+                    marks: g.marks || 1,
+                    options: (g.options || []).map((o: any) => ({
+                      id: crypto.randomUUID(),
+                      option_text: o.option_text,
+                      is_correct: o.is_correct || false,
+                    })),
+                    expected_answer: g.expected_answer || "",
+                    code_template: g.code_template || "",
+                    code_language: g.code_language || "python",
+                    test_cases: (g.test_cases || []).map((t: any) => ({
+                      id: crypto.randomUUID(),
+                      input: t.input || "",
+                      expected_output: t.expected_output || "",
+                      is_hidden: t.is_hidden || false,
+                    })),
+                    input_format: g.input_format || "",
+                    output_format: g.output_format || "",
+                    constraints_text: g.constraints_text || "",
+                    evaluation_criteria: g.evaluation_criteria || "",
+                    keywords: g.keywords || [],
+                    scenario_text: g.scenario_text || "",
+                    sub_questions: (g.sub_questions || []).map((sq: any) => ({
+                      id: crypto.randomUUID(),
+                      question_type: sq.question_type || "short_answer",
+                      question_text: sq.question_text || "",
+                      marks: sq.marks || 1,
+                      options: (sq.options || []).map((o: any) => ({ id: crypto.randomUUID(), option_text: o.option_text, is_correct: o.is_correct || false })),
+                      expected_answer: sq.expected_answer || "",
+                      code_template: "",
+                      code_language: "python",
+                      test_cases: [],
+                      input_format: "",
+                      output_format: "",
+                      constraints_text: "",
+                      evaluation_criteria: "",
+                      keywords: [],
+                      scenario_text: "",
+                      sub_questions: [],
+                    })),
+                  }));
+                  setQuestions((prev) => [...prev, ...newQuestions]);
+                }}
+              />
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-3 border-t border-border pt-6">
+              <Button variant="ghost" onClick={() => setStep(1)}>
+                <ArrowLeft size={16} /> Back
+              </Button>
+              <div className="flex-1" />
+              <Button variant="outline" size="lg" onClick={() => handleSave("draft")} disabled={saving}>
+                Save as Draft
+              </Button>
+              <Button variant="hero" size="lg" onClick={() => handleSave("published")} disabled={saving}>
+                {saving ? "Saving..." : "Publish Exam"}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

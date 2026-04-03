@@ -5,25 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-interface GeneratedQuestion {
-  question_text: string;
-  marks: number;
-  options: { option_text: string; is_correct: boolean }[];
-}
-
 interface AIQuestionGeneratorProps {
-  onQuestionsGenerated: (questions: GeneratedQuestion[]) => void;
+  onQuestionsGenerated: (questions: any[]) => void;
 }
 
 const AIQuestionGenerator = ({ onQuestionsGenerated }: AIQuestionGeneratorProps) => {
@@ -32,6 +20,7 @@ const AIQuestionGenerator = ({ onQuestionsGenerated }: AIQuestionGeneratorProps)
   const [topic, setTopic] = useState("");
   const [count, setCount] = useState("5");
   const [difficulty, setDifficulty] = useState("medium");
+  const [questionType, setQuestionType] = useState("mcq");
   const [generating, setGenerating] = useState(false);
 
   const handleGenerate = async () => {
@@ -43,7 +32,7 @@ const AIQuestionGenerator = ({ onQuestionsGenerated }: AIQuestionGeneratorProps)
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-questions", {
-        body: { topic: topic.trim(), count: parseInt(count), difficulty },
+        body: { topic: topic.trim(), count: parseInt(count), difficulty, question_type: questionType },
       });
 
       if (error) throw error;
@@ -53,7 +42,7 @@ const AIQuestionGenerator = ({ onQuestionsGenerated }: AIQuestionGeneratorProps)
       if (!questions?.length) throw new Error("No questions generated");
 
       onQuestionsGenerated(questions);
-      toast({ title: `${questions.length} questions generated!` });
+      toast({ title: `${questions.length} ${questionType} questions generated!` });
       setOpen(false);
       setTopic("");
     } catch (e: any) {
@@ -80,7 +69,7 @@ const AIQuestionGenerator = ({ onQuestionsGenerated }: AIQuestionGeneratorProps)
             <Sparkles size={18} className="text-primary" /> AI Question Generator
           </DialogTitle>
           <DialogDescription>
-            Enter a topic and AI will generate MCQ questions for your exam.
+            Generate questions of any type using AI.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
@@ -89,10 +78,23 @@ const AIQuestionGenerator = ({ onQuestionsGenerated }: AIQuestionGeneratorProps)
             <Input
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g. Binary Search Trees, Photosynthesis, World War II..."
+              placeholder="e.g. Binary Search Trees, Photosynthesis..."
               className="mt-1"
               disabled={generating}
             />
+          </div>
+          <div>
+            <Label>Question Type</Label>
+            <Select value={questionType} onValueChange={setQuestionType} disabled={generating}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mcq">MCQ</SelectItem>
+                <SelectItem value="short_answer">Short Answer</SelectItem>
+                <SelectItem value="long_answer">Long Answer</SelectItem>
+                <SelectItem value="coding">Coding</SelectItem>
+                <SelectItem value="case_study">Case Study</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -120,9 +122,7 @@ const AIQuestionGenerator = ({ onQuestionsGenerated }: AIQuestionGeneratorProps)
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={generating}>
-            Cancel
-          </Button>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={generating}>Cancel</Button>
           <Button variant="hero" onClick={handleGenerate} disabled={generating}>
             {generating ? (
               <><Loader2 size={16} className="animate-spin" /> Generating...</>
