@@ -102,7 +102,7 @@ const ExamCreate = () => {
               marks: 0,
               order_index: orderIdx++,
               scenario_text: q.scenario_text,
-            })
+            } as any)
             .select()
             .single();
 
