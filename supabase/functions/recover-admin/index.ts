@@ -48,7 +48,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ success: true, result: data }), {
+    const { data: rolesData, error: rolesError } = await adminClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .order("role");
+
+    if (rolesError) {
+      return new Response(JSON.stringify({ error: rolesError.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      result: {
+        ...(typeof data === "object" && data !== null ? data : {}),
+        roles: (rolesData || []).map((entry) => entry.role),
+      },
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {

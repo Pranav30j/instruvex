@@ -8,7 +8,7 @@ import { ShieldCheck, Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminRecover = () => {
-  const { session, user } = useAuth();
+  const { session, user, refreshRoles } = useAuth();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -27,11 +27,10 @@ const AdminRecover = () => {
 
       if (error) throw error;
 
+      await refreshRoles();
       setResult(JSON.stringify(data.result, null, 2));
-      toast({ title: "Recovery complete", description: "Roles have been updated. Refreshing..." });
-
-      // Force reload to re-fetch roles
-      setTimeout(() => window.location.href = "/dashboard", 1500);
+      toast({ title: "Recovery complete", description: "Roles have been updated." });
+      navigate("/dashboard", { replace: true });
     } catch (err: any) {
       toast({ title: "Recovery failed", description: err.message, variant: "destructive" });
     } finally {

@@ -1423,6 +1423,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_institute_admin_for: {
+        Args: { _institute_id: string; _user_id: string }
+        Returns: boolean
+      }
       recover_super_admin: {
         Args: { _user_email: string; _user_id: string }
         Returns: Json
