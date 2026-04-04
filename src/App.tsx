@@ -159,6 +159,7 @@ const App = () => (
               path="/dashboard/assignments/:assignmentId"
               element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor", "student"]}><AssignmentDetail /></ProtectedRoute>}
             />
+            <Route path="/admin/recover" element={<AdminRecover />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
