@@ -37,6 +37,7 @@ import BlogEditor from "./pages/BlogEditor";
 import Assignments from "./pages/Assignments";
 import AssignmentCreate from "./pages/AssignmentCreate";
 import AssignmentDetail from "./pages/AssignmentDetail";
+import AdminRecover from "./pages/AdminRecover";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
