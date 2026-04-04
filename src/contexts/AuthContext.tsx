@@ -89,6 +89,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (error) throw error;
     const userRoles = (data || []).map((r: { role: AppRole }) => r.role);
+    
+    // If user has no roles at all, attempt auto-recovery via edge function
+    if (userRoles.length === 0) {
+      try {
+        await supabase.functions.invoke("recover-admin");
+        // Re-fetch roles after recovery
+        const { data: refreshed } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId);
+        const refreshedRoles = (refreshed || []).map((r: { role: AppRole }) => r.role);
+        setRoles(refreshedRoles);
+        const active = resolveActiveRole(refreshedRoles);
+        setActiveRole(active);
+        if (active) localStorage.setItem(ACTIVE_ROLE_KEY, active);
+        return;
+      } catch {
+        // Recovery failed silently, continue with empty roles
+      }
+    }
+
     setRoles(userRoles);
     const active = resolveActiveRole(userRoles);
     setActiveRole(active);

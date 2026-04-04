@@ -1423,6 +1423,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      recover_super_admin: {
+        Args: { _user_email: string; _user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role:
