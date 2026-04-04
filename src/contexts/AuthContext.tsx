@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -21,6 +21,7 @@ interface AuthContextType {
   roles: AppRole[];
   activeRole: AppRole | null;
   loading: boolean;
+  refreshRoles: () => Promise<void>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -32,6 +33,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const ACTIVE_ROLE_KEY = "instruvex_active_role";
+const BOOTSTRAP_ADMIN_EMAIL = "venusboss681@gmail.com";
 
 const ROLE_PRIORITY: AppRole[] = ["super_admin", "institute_admin", "instructor", "student", "academy_learner"];
 
@@ -59,6 +61,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem(ACTIVE_ROLE_KEY);
   };
 
+  const normalizeRoles = useCallback((userRoles: AppRole[]) => {
+    const uniqueRoles = new Set(userRoles);
+    return ROLE_PRIORITY.filter((role) => uniqueRoles.has(role));
+  }, []);
+
   const resolveActiveRole = (userRoles: AppRole[]): AppRole | null => {
     if (userRoles.length === 0) return null;
     const stored = localStorage.getItem(ACTIVE_ROLE_KEY) as AppRole | null;
@@ -69,6 +76,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
     return userRoles[0];
   };
+
+  const applyRoles = useCallback((nextRoles: AppRole[]) => {
+    const normalizedRoles = normalizeRoles(nextRoles);
+    setRoles(normalizedRoles);
+
+    const active = resolveActiveRole(normalizedRoles);
+    setActiveRole(active);
+
+    if (active) {
+      localStorage.setItem(ACTIVE_ROLE_KEY, active);
+    } else {
+      localStorage.removeItem(ACTIVE_ROLE_KEY);
+    }
+
+    return normalizedRoles;
+  }, [normalizeRoles]);
 
   const fetchProfile = async (userId: string) => {
     const { data, error } = await supabase
@@ -81,40 +104,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setProfile(data as Profile | null);
   };
 
-  const fetchRoles = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
+  const fetchRolesFromBackend = useCallback(async (userId: string) => {
+    const { data, error } = await supabase.rpc("get_user_roles", { _user_id: userId });
 
     if (error) throw error;
-    const userRoles = (data || []).map((r: { role: AppRole }) => r.role);
-    
-    // If user has no roles at all, attempt auto-recovery via edge function
-    if (userRoles.length === 0) {
-      try {
-        await supabase.functions.invoke("recover-admin");
-        // Re-fetch roles after recovery
-        const { data: refreshed } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userId);
-        const refreshedRoles = (refreshed || []).map((r: { role: AppRole }) => r.role);
-        setRoles(refreshedRoles);
-        const active = resolveActiveRole(refreshedRoles);
-        setActiveRole(active);
-        if (active) localStorage.setItem(ACTIVE_ROLE_KEY, active);
-        return;
-      } catch {
-        // Recovery failed silently, continue with empty roles
-      }
+    return normalizeRoles((data || []) as AppRole[]);
+  }, [normalizeRoles]);
+
+  const fetchRoles = useCallback(async (userId: string, userEmail?: string | null) => {
+    const initialRoles = await fetchRolesFromBackend(userId);
+    const isBootstrapAdmin = userEmail?.toLowerCase() === BOOTSTRAP_ADMIN_EMAIL;
+    const needsRecovery = initialRoles.length === 0 || (isBootstrapAdmin && !initialRoles.includes("super_admin"));
+
+    if (!needsRecovery) {
+      return applyRoles(initialRoles);
     }
 
-    setRoles(userRoles);
-    const active = resolveActiveRole(userRoles);
-    setActiveRole(active);
-    if (active) localStorage.setItem(ACTIVE_ROLE_KEY, active);
-  };
+    try {
+      const { data, error } = await supabase.functions.invoke("recover-admin");
+
+      if (error) throw error;
+
+      const recoveredRoles = normalizeRoles(((data?.result?.roles as AppRole[] | undefined) || []));
+      if (recoveredRoles.length > 0) {
+        return applyRoles(recoveredRoles);
+      }
+    } catch {
+      // Fall back to a fresh backend fetch below.
+    }
+
+    const refreshedRoles = await fetchRolesFromBackend(userId);
+    return applyRoles(refreshedRoles);
+  }, [applyRoles, fetchRolesFromBackend, normalizeRoles]);
+
+  const refreshRoles = useCallback(async () => {
+    if (!user?.id) return;
+    await fetchRoles(user.id, user.email);
+  }, [fetchRoles, user]);
 
   const hydrateSessionState = async (nextSession: Session | null) => {
     setSession(nextSession);
@@ -131,7 +157,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await Promise.all([
         fetchProfile(nextSession.user.id),
-        fetchRoles(nextSession.user.id),
+        fetchRoles(nextSession.user.id, nextSession.user.email),
       ]);
     } catch (error) {
       if (isNetworkFetchError(error)) {
@@ -218,7 +244,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, roles, activeRole, loading, signUp, signIn, signOut, clearLocalSession, hasRole, switchRole }}>
+    <AuthContext.Provider value={{ session, user, profile, roles, activeRole, loading, refreshRoles, signUp, signIn, signOut, clearLocalSession, hasRole, switchRole }}>
       {children}
     </AuthContext.Provider>
   );
