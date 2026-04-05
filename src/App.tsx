@@ -38,6 +38,7 @@ import Assignments from "./pages/Assignments";
 import AssignmentCreate from "./pages/AssignmentCreate";
 import AssignmentDetail from "./pages/AssignmentDetail";
 import AdminRecover from "./pages/AdminRecover";
+import ExamSecurityReport from "./pages/ExamSecurityReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -110,6 +111,10 @@ const App = () => (
             <Route
               path="/exam/:examId/take"
               element={<ProtectedRoute><ExamTake /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/exams/:examId/security"
+              element={<ProtectedRoute allowedRoles={["super_admin", "instructor"]}><ExamSecurityReport /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/academy"
