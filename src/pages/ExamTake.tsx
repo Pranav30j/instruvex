@@ -294,6 +294,10 @@ const ExamTake = () => {
     );
   }
 
+  if (!disclaimerAccepted) {
+    return <ExamDisclaimer examTitle={exam.title} onAccept={() => setDisclaimerAccepted(true)} />;
+  }
+
   const getAllQuestionIds = (): string[] => {
     const ids: string[] = [];
     for (const item of displayItems) {
