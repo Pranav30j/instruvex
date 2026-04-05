@@ -402,6 +402,9 @@ const ExamTake = () => {
           <p className="text-xs text-muted-foreground">{answeredCount}/{totalQuestions} answered</p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 rounded-lg bg-steel/10 px-2 py-1 text-xs text-steel" title="Proctoring active">
+            <Shield size={12} /> Monitored
+          </div>
           <div className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-mono font-semibold ${
             isUrgent ? "bg-destructive/20 text-destructive animate-pulse" : "bg-steel/10 text-steel"
           }`}>
