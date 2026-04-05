@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Clock, Send, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Send, BookOpen, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { notifyExamCreatorOfSubmission } from "@/lib/notifications";
 import { Tables } from "@/integrations/supabase/types";
 import CodeEditor from "@/components/exam/CodeEditor";
+import ExamDisclaimer from "@/components/exam/ExamDisclaimer";
+import { useProctoring } from "@/hooks/use-proctoring";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -66,6 +68,16 @@ const ExamTake = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+
+  const { tabSwitches, fullscreenExits } = useProctoring({
+    examId: examId || "",
+    studentId: user?.id || "",
+    submissionId,
+    maxTabSwitches: 3,
+    onAutoSubmit: () => handleSubmit(),
+    enabled: disclaimerAccepted && !loading && !submitting,
+  });
 
   useEffect(() => {
     if (!examId || !user) return;
