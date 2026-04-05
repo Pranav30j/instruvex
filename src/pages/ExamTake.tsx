@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Clock, Send, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Send, BookOpen, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { notifyExamCreatorOfSubmission } from "@/lib/notifications";
 import { Tables } from "@/integrations/supabase/types";
 import CodeEditor from "@/components/exam/CodeEditor";
+import ExamDisclaimer from "@/components/exam/ExamDisclaimer";
+import { useProctoring } from "@/hooks/use-proctoring";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -66,6 +68,16 @@ const ExamTake = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+
+  const { tabSwitches, fullscreenExits } = useProctoring({
+    examId: examId || "",
+    studentId: user?.id || "",
+    submissionId,
+    maxTabSwitches: 3,
+    onAutoSubmit: () => handleSubmit(),
+    enabled: disclaimerAccepted && !loading && !submitting,
+  });
 
   useEffect(() => {
     if (!examId || !user) return;
@@ -282,6 +294,10 @@ const ExamTake = () => {
     );
   }
 
+  if (!disclaimerAccepted) {
+    return <ExamDisclaimer examTitle={exam.title} onAccept={() => setDisclaimerAccepted(true)} />;
+  }
+
   const getAllQuestionIds = (): string[] => {
     const ids: string[] = [];
     for (const item of displayItems) {
@@ -386,6 +402,9 @@ const ExamTake = () => {
           <p className="text-xs text-muted-foreground">{answeredCount}/{totalQuestions} answered</p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 rounded-lg bg-steel/10 px-2 py-1 text-xs text-steel" title="Proctoring active">
+            <Shield size={12} /> Monitored
+          </div>
           <div className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-mono font-semibold ${
             isUrgent ? "bg-destructive/20 text-destructive animate-pulse" : "bg-steel/10 text-steel"
           }`}>

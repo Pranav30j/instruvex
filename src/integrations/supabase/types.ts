@@ -985,6 +985,127 @@ export type Database = {
         }
         Relationships: []
       }
+      plagiarism_records: {
+        Row: {
+          created_at: string
+          details: Json | null
+          detection_method: string
+          exam_id: string
+          flagged: boolean
+          id: string
+          matched_student_id: string | null
+          question_id: string
+          similarity_score: number
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          detection_method?: string
+          exam_id: string
+          flagged?: boolean
+          id?: string
+          matched_student_id?: string | null
+          question_id: string
+          similarity_score?: number
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          detection_method?: string
+          exam_id?: string
+          flagged?: boolean
+          id?: string
+          matched_student_id?: string | null
+          question_id?: string
+          similarity_score?: number
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plagiarism_records_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plagiarism_records_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plagiarism_records_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_student"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_logs: {
+        Row: {
+          auto_submitted: boolean
+          copy_attempts: number
+          created_at: string
+          exam_id: string
+          face_flags: number
+          fullscreen_exit_count: number
+          id: string
+          student_id: string
+          submission_id: string | null
+          tab_switch_count: number
+          updated_at: string
+          warnings_shown: number
+        }
+        Insert: {
+          auto_submitted?: boolean
+          copy_attempts?: number
+          created_at?: string
+          exam_id: string
+          face_flags?: number
+          fullscreen_exit_count?: number
+          id?: string
+          student_id: string
+          submission_id?: string | null
+          tab_switch_count?: number
+          updated_at?: string
+          warnings_shown?: number
+        }
+        Update: {
+          auto_submitted?: boolean
+          copy_attempts?: number
+          created_at?: string
+          exam_id?: string
+          face_flags?: number
+          fullscreen_exit_count?: number
+          id?: string
+          student_id?: string
+          submission_id?: string | null
+          tab_switch_count?: number
+          updated_at?: string
+          warnings_shown?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_logs_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proctoring_logs_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "exam_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

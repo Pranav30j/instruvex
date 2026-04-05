@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Play, Clock, FileText, Users, Pencil } from "lucide-react";
+import { ArrowLeft, Play, Clock, FileText, Users, Pencil, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,9 +91,14 @@ const ExamView = () => {
             </Button>
           )}
           {isCreator && (
-            <Button variant="outline" size="lg" asChild>
-              <Link to={`/dashboard/exams/${examId}/edit`}><Pencil size={16} /> Edit Exam</Link>
-            </Button>
+            <>
+              <Button variant="outline" size="lg" asChild>
+                <Link to={`/dashboard/exams/${examId}/edit`}><Pencil size={16} /> Edit Exam</Link>
+              </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link to={`/dashboard/exams/${examId}/security`}><Shield size={16} /> Security Report</Link>
+              </Button>
+            </>
           )}
         </div>
 
