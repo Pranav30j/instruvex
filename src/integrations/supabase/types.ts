@@ -536,6 +536,60 @@ export type Database = {
           },
         ]
       }
+      attendance_records: {
+        Row: {
+          batch_id: string
+          created_at: string
+          date: string
+          id: string
+          lecture_number: number | null
+          marked_by: string
+          status: string
+          student_id: string
+          subject_id: string
+          updated_at: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          date?: string
+          id?: string
+          lecture_number?: number | null
+          marked_by: string
+          status?: string
+          student_id: string
+          subject_id: string
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          lecture_number?: number | null
+          marked_by?: string
+          status?: string
+          student_id?: string
+          subject_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       batches: {
         Row: {
           created_at: string
@@ -618,6 +672,77 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      class_students: {
+        Row: {
+          batch_id: string
+          created_at: string
+          id: string
+          roll_number: string | null
+          student_id: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          id?: string
+          roll_number?: string | null
+          student_id: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          id?: string
+          roll_number?: string | null
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_students_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_subjects: {
+        Row: {
+          batch_id: string
+          created_at: string
+          id: string
+          instructor_id: string
+          subject_id: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          id?: string
+          instructor_id: string
+          subject_id: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          id?: string
+          instructor_id?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_subjects_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_subjects_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_submissions: {
         Row: {
@@ -1340,6 +1465,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subjects: {
+        Row: {
+          code: string | null
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
