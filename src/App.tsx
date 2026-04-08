@@ -39,6 +39,10 @@ import AssignmentCreate from "./pages/AssignmentCreate";
 import AssignmentDetail from "./pages/AssignmentDetail";
 import AdminRecover from "./pages/AdminRecover";
 import ExamSecurityReport from "./pages/ExamSecurityReport";
+import AttendanceHome from "./pages/AttendanceHome";
+import TakeAttendance from "./pages/TakeAttendance";
+import ManageAttendance from "./pages/ManageAttendance";
+import AttendanceReport from "./pages/AttendanceReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -165,6 +169,22 @@ const App = () => (
               element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor", "student"]}><AssignmentDetail /></ProtectedRoute>}
             />
             <Route path="/admin/recover" element={<AdminRecover />} />
+            <Route
+              path="/dashboard/attendance"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor", "student"]}><AttendanceHome /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/attendance/take"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><TakeAttendance /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/attendance/manage"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin"]}><ManageAttendance /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/attendance/report"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><AttendanceReport /></ProtectedRoute>}
+            />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
