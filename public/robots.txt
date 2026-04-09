@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /dashboard/
 
-Sitemap: https://instruvex.lovable.app/sitemap.xml
+Sitemap: https://instruvex.in/sitemap.xml
