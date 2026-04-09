@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 const navLinks = [
   { label: "Features", href: "/#features" },
   { label: "Academy", href: "/#academy" },
+  { label: "Pricing", href: "/#pricing" },
   { label: "About", href: "/about" },
   { label: "Blog", href: "/blog" },
-  { label: "Careers", href: "/careers" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -44,9 +44,9 @@ const Navbar = () => {
           <Link to="/login">
             <Button variant="ghost" size="sm">Sign In</Button>
           </Link>
-          <Link to="/signup">
-            <Button variant="hero" size="sm">Get Started</Button>
-          </Link>
+          <a href="#book-demo">
+            <Button variant="hero" size="sm">Book Demo</Button>
+          </a>
         </div>
 
         <button
@@ -80,9 +80,9 @@ const Navbar = () => {
                 <Link to="/login" className="flex-1">
                   <Button variant="ghost" size="sm" className="w-full">Sign In</Button>
                 </Link>
-                <Link to="/signup" className="flex-1">
-                  <Button variant="hero" size="sm" className="w-full">Get Started</Button>
-                </Link>
+                <a href="#book-demo" className="flex-1" onClick={() => setMobileOpen(false)}>
+                  <Button variant="hero" size="sm" className="w-full">Book Demo</Button>
+                </a>
               </div>
             </div>
           </motion.div>
