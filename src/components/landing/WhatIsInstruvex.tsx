@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 const highlights = [
   "AI-powered question generation with Bloom's taxonomy",
   "Secure online examination with anti-cheat proctoring",
-  "Real-time performance analytics and insights",
+  "Automated attendance management with analytics",
   "Full LMS with video courses and progress tracking",
   "Verifiable digital certificates with QR codes",
-  "Multi-tenant architecture for institutions",
+  "Multi-tenant architecture for schools & colleges",
 ];
 
 const WhatIsInstruvex = () => (
-  <section className="relative py-24">
+  <section className="relative py-24 border-t border-border">
     <div className="container mx-auto px-4">
       <div className="grid items-center gap-16 lg:grid-cols-2">
         <motion.div
@@ -23,20 +23,20 @@ const WhatIsInstruvex = () => (
           transition={{ duration: 0.6 }}
         >
           <span className="mb-3 inline-block rounded-full border border-steel/20 bg-navy-elevated/50 px-4 py-1 text-xs font-medium uppercase tracking-wider text-steel">
-            About Instruvex
+            About the Platform
           </span>
           <h2 className="mb-4 font-display text-3xl font-bold text-foreground md:text-5xl">
             What is <span className="text-gradient">Instruvex</span>?
           </h2>
           <p className="mb-6 text-muted-foreground leading-relaxed">
-            Instruvex is an <strong className="text-foreground">AI-powered learning and assessment platform</strong> designed 
-            for educational institutions, instructors, and students. It combines online exams, a full learning management 
-            system (LMS), real-time analytics, and a digital certification engine into one unified platform.
+            Instruvex is an <strong className="text-foreground">AI-powered education platform</strong> designed
+            to help schools and colleges automate exams, manage student data, track attendance, and improve
+            academic efficiency through intelligent tools — all under one unified system.
           </p>
           <p className="mb-8 text-muted-foreground leading-relaxed">
-            Whether you need to create AI-generated question papers, deliver secure online examinations, 
-            manage video courses, or issue verifiable certificates — Instruvex handles it all with 
-            enterprise-grade security and scalability.
+            Whether you need to create AI-generated question papers, deliver secure online examinations,
+            manage video courses, or issue verifiable certificates — Instruvex handles it all with
+            enterprise-grade security and scalability built for Indian institutes.
           </p>
           <Link to="/signup">
             <Button variant="hero" size="lg" className="gap-2">

@@ -3,13 +3,18 @@ import { Link } from "react-router-dom";
 const footerLinks = {
   Product: [
     { label: "Features", href: "/#features" },
-    { label: "Academy", href: "/#academy" },
+    { label: "Instruvex ERP", href: "/#features" },
+    { label: "Instruvex Exams", href: "/#features" },
+    { label: "Instruvex Academy", href: "/#academy" },
     { label: "Pricing", href: "/#pricing" },
+  ],
+  Resources: [
+    { label: "Blog", href: "/blog" },
     { label: "Verify Certificate", href: "/verify" },
+    { label: "Book a Demo", href: "/#book-demo" },
   ],
   Company: [
     { label: "About", href: "/about" },
-    { label: "Blog", href: "/blog" },
     { label: "Careers", href: "/careers" },
     { label: "Contact", href: "/contact" },
   ],
@@ -21,10 +26,10 @@ const footerLinks = {
 };
 
 const Footer = () => (
-  <footer id="contact" className="border-t border-border bg-navy-deep py-16">
+  <footer className="border-t border-border bg-navy-deep py-16">
     <div className="container mx-auto px-4">
-      <div className="grid gap-12 md:grid-cols-4">
-        <div>
+      <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
+        <div className="lg:col-span-1">
           <Link to="/" className="mb-4 flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-steel to-cyan-accent">
               <span className="font-display text-xs font-bold text-primary-foreground">IX</span>
@@ -33,8 +38,11 @@ const Footer = () => (
               Instruvex
             </span>
           </Link>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            AI-powered academic intelligence platform integrating assessment, analytics, and certification.
+          <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+            AI-powered ERP and exam platform for schools, colleges, and educational institutes across India.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Transforming education with intelligent technology.
           </p>
         </div>
         {Object.entries(footerLinks).map(([title, links]) => (
