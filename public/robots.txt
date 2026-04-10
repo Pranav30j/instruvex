@@ -1,5 +1,11 @@
 User-agent: *
+
 Allow: /
+
 Disallow: /dashboard/
+Disallow: /login
+Disallow: /signup
+Disallow: /api/
+Disallow: /admin/
 
 Sitemap: https://instruvex.in/sitemap.xml
