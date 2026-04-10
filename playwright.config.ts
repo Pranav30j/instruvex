@@ -4,6 +4,6 @@ export default defineConfig({
   testDir: "./e2e",
   timeout: 30000,
   use: {
-    baseURL: "https://instruvex.lovable.app",
+    baseURL: "https://instruvex.in",
   },
 });
