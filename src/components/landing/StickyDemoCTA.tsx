@@ -3,8 +3,8 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { useState } from "react";
 
-const WHATSAPP_NUMBER = "919876543210";
-const WHATSAPP_MESSAGE = encodeURIComponent("Hi, I'd like to learn more about Instruvex for my institute.");
+const WHATSAPP_NUMBER = "919425675330";
+const WHATSAPP_MESSAGE = encodeURIComponent("Hi I want to book a demo for Instruvex");
 
 const StickyDemoCTA = () => {
   const [visible, setVisible] = useState(false);

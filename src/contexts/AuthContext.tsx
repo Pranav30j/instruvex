@@ -201,7 +201,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password,
         options: {
           data: { first_name: firstName, last_name: lastName },
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: "https://instruvex.in",
         },
       });
       return { error: error as Error | null };

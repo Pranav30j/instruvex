@@ -2,7 +2,7 @@ import { useState } from "react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Send } from "lucide-react";
+import { Mail, MapPin, Send, Instagram, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -127,7 +127,7 @@ const Contact = () => {
                   <Mail size={20} className="text-steel" />
                 </div>
                 <h3 className="mb-1 font-display text-lg font-semibold text-foreground">Email</h3>
-                <p className="text-sm text-muted-foreground">contact@instruvex.com</p>
+                <a href="mailto:contact@instruvex.in" className="text-sm text-muted-foreground hover:text-foreground transition-colors">contact@instruvex.in</a>
               </div>
               <div className="rounded-xl border border-border bg-card-gradient p-6 shadow-card">
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
@@ -135,6 +135,20 @@ const Contact = () => {
                 </div>
                 <h3 className="mb-1 font-display text-lg font-semibold text-foreground">Location</h3>
                 <p className="text-sm text-muted-foreground">India — Serving Globally</p>
+              </div>
+              <div className="rounded-xl border border-border bg-card-gradient p-6 shadow-card">
+                <h3 className="mb-3 font-display text-lg font-semibold text-foreground">Follow Us</h3>
+                <div className="flex gap-3">
+                  <a href="https://instagram.com/instruvex.official" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground hover:text-foreground transition-colors" aria-label="Instagram">
+                    <Instagram size={20} />
+                  </a>
+                  <a href="https://www.linkedin.com/company/instruvex" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn">
+                    <Linkedin size={20} />
+                  </a>
+                  <a href="https://wa.me/919425675330?text=Hi%20I%20want%20to%20book%20a%20demo%20for%20Instruvex" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground hover:text-foreground transition-colors" aria-label="WhatsApp">
+                    <Mail size={20} />
+                  </a>
+                </div>
               </div>
             </motion.div>
           </div>
