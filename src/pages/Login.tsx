@@ -6,7 +6,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 
 const getFriendlyLoginError = (message: string) => {
   const normalized = message.toLowerCase();
