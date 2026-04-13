@@ -39,6 +39,7 @@ import AssignmentCreate from "./pages/AssignmentCreate";
 import AssignmentDetail from "./pages/AssignmentDetail";
 import AdminRecover from "./pages/AdminRecover";
 import ExamSecurityReport from "./pages/ExamSecurityReport";
+import AuthCallback from "./pages/AuthCallback";
 import AttendanceHome from "./pages/AttendanceHome";
 import TakeAttendance from "./pages/TakeAttendance";
 import ManageAttendance from "./pages/ManageAttendance";
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route
               path="/dashboard"
               element={<ProtectedRoute><Dashboard /></ProtectedRoute>}

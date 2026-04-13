@@ -71,7 +71,7 @@ const AuthCallback = () => {
 
         {status === "success" && (
           <>
-            <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+            <CheckCircle className="mx-auto h-12 w-12 text-emerald-500 mb-4" />
             <h1 className="font-display text-xl font-bold text-foreground mb-2">Verification successful!</h1>
             <p className="text-sm text-muted-foreground">Redirecting to your dashboard...</p>
           </>

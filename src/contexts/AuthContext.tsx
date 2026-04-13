@@ -201,7 +201,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password,
         options: {
           data: { first_name: firstName, last_name: lastName },
-          emailRedirectTo: "https://instruvex.in",
+          emailRedirectTo: "https://instruvex.in/auth/callback",
         },
       });
       return { error: error as Error | null };
