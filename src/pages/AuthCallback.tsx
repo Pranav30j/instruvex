@@ -6,11 +6,6 @@ import { Loader2, CheckCircle, XCircle } from "lucide-react";
 type CallbackStatus = "processing" | "success" | "error";
 
 const AuthCallback = () => {
-  // Clean hash immediately before React renders
-  if (window.location.hash) {
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-
   const navigate = useNavigate();
   const [status, setStatus] = useState<CallbackStatus>("processing");
   const [errorMsg, setErrorMsg] = useState("");
@@ -18,7 +13,9 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuth = async () => {
       try {
-        // Supabase automatically reads #access_token from URL hash
+        // Small delay to ensure Supabase client reads the URL hash
+        await new Promise((res) => setTimeout(res, 500));
+
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
@@ -30,7 +27,10 @@ const AuthCallback = () => {
 
         if (data.session) {
           console.log("User logged in:", data.session.user.email);
+
+          // Clean URL AFTER session is successfully read
           window.history.replaceState({}, document.title, "/auth/callback");
+
           setStatus("success");
           setTimeout(() => navigate("/dashboard", { replace: true }), 800);
         } else {
