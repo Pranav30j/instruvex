@@ -25,6 +25,7 @@ const AuthCallback = () => {
 
         if (data.session) {
           console.log("User logged in:", data.session.user.email);
+          window.history.replaceState({}, document.title, "/auth/callback");
           setStatus("success");
           setTimeout(() => navigate("/dashboard", { replace: true }), 800);
         } else {
