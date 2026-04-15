@@ -6,6 +6,11 @@ import { Loader2, CheckCircle, XCircle } from "lucide-react";
 type CallbackStatus = "processing" | "success" | "error";
 
 const AuthCallback = () => {
+  // Clean hash immediately before React renders
+  if (window.location.hash) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
   const navigate = useNavigate();
   const [status, setStatus] = useState<CallbackStatus>("processing");
   const [errorMsg, setErrorMsg] = useState("");
