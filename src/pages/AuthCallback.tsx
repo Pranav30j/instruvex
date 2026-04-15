@@ -13,17 +13,7 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuth = async () => {
       try {
-        // First, let Supabase exchange the hash/query tokens for a session
-        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(
-          window.location.href
-        );
-
-        // exchangeCodeForSession may fail if it's a hash-based flow (implicit),
-        // so fall back to getSession which handles hash tokens automatically
-        if (exchangeError) {
-          console.log("Code exchange not applicable, trying getSession:", exchangeError.message);
-        }
-
+        // Supabase automatically reads #access_token from URL hash
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
@@ -37,30 +27,11 @@ const AuthCallback = () => {
           console.log("User logged in:", data.session.user.email);
           setStatus("success");
           setTimeout(() => navigate("/dashboard", { replace: true }), 800);
-          return;
+        } else {
+          console.error("No session found");
+          setStatus("error");
+          setErrorMsg("No session found. Please try logging in again.");
         }
-
-        // No session yet — listen for auth state change
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-          if (event === "SIGNED_IN" && session) {
-            console.log("Auth state changed — signed in:", session.user.email);
-            setStatus("success");
-            setTimeout(() => navigate("/dashboard", { replace: true }), 800);
-            subscription.unsubscribe();
-          }
-        });
-
-        // Timeout after 8 seconds
-        setTimeout(() => {
-          setStatus((prev) => {
-            if (prev === "processing") {
-              subscription.unsubscribe();
-              return "error";
-            }
-            return prev;
-          });
-          setErrorMsg("Verification timed out. Please try logging in again.");
-        }, 8000);
       } catch (err) {
         console.error("Auth callback error:", err);
         setStatus("error");
