@@ -433,6 +433,59 @@ export type Database = {
           },
         ]
       }
+      applications: {
+        Row: {
+          applied_at: string
+          cover_letter: string | null
+          email: string
+          full_name: string
+          id: string
+          job_id: string
+          phone: string | null
+          portfolio_link: string | null
+          resume_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          applied_at?: string
+          cover_letter?: string | null
+          email: string
+          full_name: string
+          id?: string
+          job_id: string
+          phone?: string | null
+          portfolio_link?: string | null
+          resume_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          applied_at?: string
+          cover_letter?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          job_id?: string
+          phone?: string | null
+          portfolio_link?: string | null
+          resume_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignment_submissions: {
         Row: {
           assignment_id: string
@@ -1074,6 +1127,60 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      job_posts: {
+        Row: {
+          company_name: string
+          created_at: string
+          description: string
+          duration: string | null
+          id: string
+          location: string | null
+          posted_by: string
+          requirements: string | null
+          salary: string | null
+          skills_required: string[] | null
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          work_mode: string
+        }
+        Insert: {
+          company_name?: string
+          created_at?: string
+          description?: string
+          duration?: string | null
+          id?: string
+          location?: string | null
+          posted_by: string
+          requirements?: string | null
+          salary?: string | null
+          skills_required?: string[] | null
+          status?: string
+          title: string
+          type?: string
+          updated_at?: string
+          work_mode?: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          description?: string
+          duration?: string | null
+          id?: string
+          location?: string | null
+          posted_by?: string
+          requirements?: string | null
+          salary?: string | null
+          skills_required?: string[] | null
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          work_mode?: string
         }
         Relationships: []
       }
