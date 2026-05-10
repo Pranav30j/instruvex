@@ -30,6 +30,10 @@ import RoleManagement from "./pages/RoleManagement";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Careers from "./pages/Careers";
+import CareerDetail from "./pages/CareerDetail";
+import CareersManage from "./pages/dashboard/CareersManage";
+import CareersApplications from "./pages/dashboard/CareersApplications";
+import MyApplications from "./pages/dashboard/MyApplications";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogManage from "./pages/BlogManage";
@@ -65,6 +69,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/careers" element={<Careers />} />
+            <Route path="/careers/:id" element={<CareerDetail />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/login" element={<Login />} />
@@ -186,6 +191,18 @@ const App = () => (
             <Route
               path="/dashboard/attendance/report"
               element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><AttendanceReport /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/careers/manage"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><CareersManage /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/careers/applications"
+              element={<ProtectedRoute allowedRoles={["super_admin", "institute_admin", "instructor"]}><CareersApplications /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/careers/my-applications"
+              element={<ProtectedRoute><MyApplications /></ProtectedRoute>}
             />
           </Routes>
         </AuthProvider>
