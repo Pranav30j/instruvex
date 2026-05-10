@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Building2, GraduationCap, ShieldCheck, ChevronDown, PenSquare, ClipboardList, CalendarCheck,
+  LayoutDashboard, FileText, Brain, BarChart3, BookOpen, Award, Users, Settings, LogOut, Menu, X, Building2, GraduationCap, ShieldCheck, ChevronDown, PenSquare, ClipboardList, CalendarCheck, Briefcase, Inbox, Send,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
@@ -38,6 +38,9 @@ const allSidebarItems: SidebarItem[] = [
   { icon: CalendarCheck, label: "Attendance", path: "/dashboard/attendance", roles: ["super_admin", "institute_admin", "instructor", "student"] },
   { icon: ShieldCheck, label: "User Roles", path: "/dashboard/roles", roles: ["super_admin", "institute_admin"] },
   { icon: PenSquare, label: "Blog", path: "/dashboard/blog", roles: ["super_admin", "institute_admin"] },
+  { icon: Briefcase, label: "Manage Careers", path: "/dashboard/careers/manage", roles: ["super_admin", "institute_admin", "instructor"] },
+  { icon: Inbox, label: "Applications", path: "/dashboard/careers/applications", roles: ["super_admin", "institute_admin", "instructor"] },
+  { icon: Send, label: "My Applications", path: "/dashboard/careers/my-applications", roles: ["student", "academy_learner"] },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
