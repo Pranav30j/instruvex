@@ -1,74 +1,37 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { motion } from "framer-motion";
-import { Briefcase, MapPin, Clock, Send } from "lucide-react";
+import { Briefcase, MapPin, IndianRupee, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { z } from "zod";
-
-const applicationSchema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(100),
-  email: z.string().trim().email("Invalid email").max(255),
-  linkedin_url: z.string().trim().max(500).optional().or(z.literal("")),
-  message: z.string().trim().max(2000).optional().or(z.literal("")),
-});
 
 const Careers = () => {
-  const { toast } = useToast();
-  const [selectedJob, setSelectedJob] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", linkedin_url: "", message: "" });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [modeFilter, setModeFilter] = useState<string>("all");
 
   const { data: jobs = [] } = useQuery({
-    queryKey: ["job-listings"],
+    queryKey: ["job-posts-public"],
     queryFn: async () => {
-      const { data, error } = await (supabase.from("job_listings" as any) as any).select("*").eq("is_active", true).order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("job_posts")
+        .select("*")
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
-  const handleApply = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedJob) return;
-    setErrors({});
-
-    const result = applicationSchema.safeParse(form);
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      result.error.issues.forEach((i) => { fieldErrors[i.path[0] as string] = i.message; });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { error } = await supabase.from("job_applications" as any).insert({
-        job_id: selectedJob,
-        name: result.data.name,
-        email: result.data.email,
-        linkedin_url: result.data.linkedin_url || null,
-        message: result.data.message || null,
-      });
-      if (error) throw error;
-      toast({ title: "Application submitted!", description: "We'll review your application and get back to you." });
-      setSelectedJob(null);
-      setForm({ name: "", email: "", linkedin_url: "", message: "" });
-    } catch {
-      toast({ title: "Error", description: "Failed to submit application.", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filtered = jobs.filter((j: any) => {
+    if (typeFilter !== "all" && j.type !== typeFilter) return false;
+    if (modeFilter !== "all" && j.work_mode !== modeFilter) return false;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,81 +53,76 @@ const Careers = () => {
             transition={{ delay: 0.1 }}
             className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground"
           >
-            Help us build the future of AI-powered education
+            Explore open roles and internships shaping the future of AI-powered education
           </motion.p>
         </div>
       </section>
 
       <section className="pb-24">
         <div className="container mx-auto px-4">
-          <h2 className="mb-8 font-display text-2xl font-bold text-foreground">Open Positions</h2>
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="font-display text-2xl font-bold text-foreground">Open Positions</h2>
+            <div className="flex flex-wrap gap-2">
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="job">Jobs</SelectItem>
+                  <SelectItem value="internship">Internships</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={modeFilter} onValueChange={setModeFilter}>
+                <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Modes</SelectItem>
+                  <SelectItem value="remote">Remote</SelectItem>
+                  <SelectItem value="onsite">Onsite</SelectItem>
+                  <SelectItem value="hybrid">Hybrid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-          {jobs.length === 0 ? (
+          {filtered.length === 0 ? (
             <div className="rounded-xl border border-border bg-card-gradient p-12 text-center shadow-card">
               <Briefcase size={48} className="mx-auto mb-4 text-muted-foreground" />
-              <h3 className="mb-2 font-display text-xl font-semibold text-foreground">No openings currently</h3>
-              <p className="text-muted-foreground">Stay tuned! We're always growing and new positions open frequently.</p>
+              <h3 className="mb-2 font-display text-xl font-semibold text-foreground">No openings match your filters</h3>
+              <p className="text-muted-foreground">Check back soon — new roles open frequently.</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {jobs.map((job, i) => (
+            <div className="grid gap-4 md:grid-cols-2">
+              {filtered.map((job: any, i: number) => (
                 <motion.div
                   key={job.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05 }}
-                  className="flex flex-col gap-4 rounded-xl border border-border bg-card-gradient p-6 shadow-card sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-4 rounded-xl border border-border bg-card-gradient p-6 shadow-card"
                 >
-                  <div>
-                    <h3 className="font-display text-lg font-semibold text-foreground">{job.title}</h3>
-                    <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1"><Briefcase size={14} /> {job.department}</span>
-                      <span className="flex items-center gap-1"><MapPin size={14} /> {job.location}</span>
-                      <span className="flex items-center gap-1"><Clock size={14} /> {job.type}</span>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="font-display text-lg font-semibold text-foreground">{job.title}</h3>
+                      <p className="text-sm text-muted-foreground">{job.company_name}</p>
                     </div>
+                    <Badge variant="secondary" className="capitalize">{job.type}</Badge>
                   </div>
-                  <Button variant="hero" size="sm" onClick={() => setSelectedJob(job.id)}>
-                    Apply Now
-                  </Button>
+                  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1 capitalize"><MapPin size={14} /> {job.work_mode}{job.location ? ` · ${job.location}` : ""}</span>
+                    {job.salary && <span className="flex items-center gap-1"><IndianRupee size={14} /> {job.salary}</span>}
+                    {job.duration && <span className="flex items-center gap-1"><Clock size={14} /> {job.duration}</span>}
+                  </div>
+                  <div className="flex justify-end">
+                    <Button asChild variant="hero" size="sm">
+                      <Link to={`/careers/${job.id}`}>View Details</Link>
+                    </Button>
+                  </div>
                 </motion.div>
               ))}
             </div>
           )}
         </div>
       </section>
-
-      {/* Apply Dialog */}
-      <Dialog open={!!selectedJob} onOpenChange={(open) => !open && setSelectedJob(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-display">Apply for Position</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleApply} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="apply-name">Name *</Label>
-              <Input id="apply-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="apply-email">Email *</Label>
-              <Input id="apply-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="apply-linkedin">LinkedIn / Portfolio URL</Label>
-              <Input id="apply-linkedin" value={form.linkedin_url} onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="apply-message">Cover Note</Label>
-              <Textarea id="apply-message" rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
-            </div>
-            <Button type="submit" variant="hero" className="w-full gap-2" disabled={loading}>
-              <Send size={16} /> {loading ? "Submitting..." : "Submit Application"}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       <Footer />
     </div>
