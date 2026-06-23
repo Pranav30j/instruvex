@@ -156,7 +156,7 @@ export default function AcademyCourseCreate() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Price ($)</Label>
+                <Label>Price (₹)</Label>
                 <Input
                   type="number"
                   min="0"

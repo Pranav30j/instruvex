@@ -1,70 +1,99 @@
-## Careers Module — Full Implementation Plan
 
-Build a complete careers/jobs system with admin management, public listings, applications, and student tracking.
+# Instruvex Academy Upgrade Plan
 
-### 1. Database (migration)
+A large, multi-part upgrade. I'll ship it in coherent phases so each is reviewable and testable. Let me know if you'd like any phase deferred or expanded.
 
-**New table: `job_posts`**
-- title, company_name (default 'Instruvex'), type ('job'|'internship'), location, work_mode ('remote'|'onsite'|'hybrid'), salary, duration, description, requirements, skills_required (text[]), posted_by, status ('active'|'closed'), created_at, updated_at
+---
 
-**New table: `applications`**
-- job_id, user_id, full_name, email, phone, resume_url, portfolio_link, cover_letter, status ('pending'|'shortlisted'|'rejected'|'selected'), applied_at, updated_at
-- UNIQUE (job_id, user_id) to prevent duplicate applications
+## Phase 1 — INR Currency Conversion (no data migration)
 
-**New storage bucket: `resumes`** (private) with RLS for owner upload/read + admin/job-owner read.
+Replace `$` with `₹` everywhere prices are rendered. Prices stay in the existing `price` numeric column — we simply re-interpret/format them as INR. No DB migration needed unless you want me to convert existing values mathematically.
 
-**RLS policies:**
-- `job_posts`: public can SELECT active; super_admin/institute_admin/instructor manage; creators (posted_by) manage own
-- `applications`: applicant manages own; job poster + super_admin can view/update status; users can INSERT for themselves
+Files to update:
+- `src/pages/AcademyHome.tsx` — course cards (`$${price}`, `Enroll – $`)
+- `src/pages/AcademyCourseDetail.tsx` — detail price + checkout
+- `src/pages/AcademyCourseCreate.tsx` — form label "Price (USD)" → "Price (INR)"
+- `src/pages/AcademyManage.tsx` — listings
+- `src/components/landing/PricingSection.tsx` — subscription plans
+- Any revenue/admin dashboards rendering currency
+- New helper: `src/lib/currency.ts` exporting `formatINR(n)` → `₹1,234` (uses `Intl.NumberFormat('en-IN')`)
 
-Keep existing `job_listings` / `job_applications` tables intact (used by `/careers` public page already) — but the new module supersedes them. We'll point the existing public `/careers` page at the new `job_posts` table for consistency, and keep `job_applications` untouched (legacy).
+**Question for you:** Are existing course prices already INR values (just displayed with $), or do they need mathematical conversion (× ~83)? I'll assume **values are already INR** and only swap the symbol unless you tell me otherwise.
 
-Actually — to avoid breakage, replace the existing `Careers.tsx` content to use `job_posts` + new applications flow.
+---
 
-### 2. Routes (App.tsx)
+## Phase 2 — Public Academy Discovery (no login required)
 
-Public:
-- `/careers` — list active jobs (replace existing page)
-- `/careers/:id` — job detail + apply
+New public routes:
+- `/academy` — public Academy home with hero, featured courses, full catalog, filters, search
+- `/academy/course/:slug` — public course detail page (currently `/dashboard/academy/course/:id`, dashboard route preserved)
+- `/academy/:category` — SEO category landing pages (data-science, ai, web-development, programming, gate-preparation)
 
-Protected (sidebar item "Careers"):
-- `/dashboard/careers/manage` — admin/instructor: list, create, edit, delete jobs
-- `/dashboard/careers/applications` — admin/instructor: view/manage applicants
-- `/dashboard/careers/my-applications` — student: track own applications
+DB migration:
+- Add `slug TEXT UNIQUE` to `academy_courses`, auto-populated from title (backfill existing rows)
+- Add `original_price NUMERIC` (for discount badge), `rating NUMERIC`, `enrolled_count` (computed view or denormalized counter)
+- Adjust `academy_courses` SELECT RLS to allow `anon` to read `is_published = true` rows (currently auth-only). Same for `academy_modules`/`academy_lectures` metadata used on the public detail page — lecture **content** stays gated.
 
-Allowed roles for manage/applications: `super_admin`, `institute_admin`, `instructor`.
+Homepage integration:
+- New `src/components/landing/FeaturedCoursesSection.tsx` injected into `src/pages/Index.tsx` between `AcademySection` and `PricingSection`
+- Fetches up to 8 published courses, ordered by `is_featured DESC, created_at DESC`
+- Card shows: thumbnail, title, instructor, category, duration, lecture count, level, ₹ price, discount badge, rating, enrolled count, View / Enroll buttons
 
-### 3. Pages to build
+---
 
-- `src/pages/Careers.tsx` (rewrite) — public list with filters (type, work_mode)
-- `src/pages/CareerDetail.tsx` — detail + apply dialog (resume upload to storage)
-- `src/pages/dashboard/CareersManage.tsx` — admin CRUD with create/edit dialog
-- `src/pages/dashboard/CareersApplications.tsx` — applicants list, filter by job, status actions
-- `src/pages/dashboard/MyApplications.tsx` — student tracker
+## Phase 3 — SEO Foundation
 
-### 4. Sidebar
+- Install `react-helmet-async`, wrap app in `<HelmetProvider>` in `src/main.tsx`
+- Per-route `<Helmet>` on: Index, `/academy`, `/academy/course/:slug`, `/academy/:category`, About, Blog, BlogPost, Careers, CareerDetail, Contact, legal pages
+- Structured data:
+  - Sitewide `Organization` + `WebSite` in `index.html` (keep existing)
+  - Per-course `Course` schema (name, description, provider, instructor, price `priceCurrency: INR`, duration, aggregateRating)
+  - Per-category `ItemList` schema
+- Canonical + og:url self-reference each route
+- Homepage meta title/description tuned to target keywords listed in the brief
 
-Add "Careers" item to `DashboardLayout` sidebar nav. Show different sub-items based on role.
+---
 
-### 5. Notifications
+## Phase 4 — Dynamic sitemap + robots
 
-Use existing `create_notification` RPC:
-- On apply → confirm to applicant
-- On status change → notify applicant
+- Create `scripts/generate-sitemap.ts` that runs on `predev` / `prebuild`
+- Pulls all published courses + categories from Supabase using `SUPABASE_URL` + anon key (read-only public data) and writes `public/sitemap.xml`
+- Static entries: `/`, `/about`, `/blog`, `/contact`, `/careers`, `/verify`, `/academy`, `/terms-and-conditions`, `/privacy-policy`, `/refund-policy`
+- Dynamic: every published course slug, every category page, every published blog post
+- `public/robots.txt` already correct; add nothing besides confirming the sitemap URL
 
-### 6. UI/Styling
+---
 
-Match existing Instruvex dark metallic navy theme; reuse Card, Button (hero variant), Badge, Dialog, Input, Textarea, Select.
+## Phase 5 — Search, Filters, Sort
 
-### 7. Security
+Already partially present in dashboard Academy; build a richer version on `/academy`:
+- Search box (title + description)
+- Filters: category, price (free / paid / range), duration bucket, difficulty
+- Sort: popularity (enrolled_count desc), latest, price asc/desc
+- URL-synced filter state (`?category=ai&sort=latest`) so filtered views are linkable + indexable
 
-- RLS enforced server-side
-- ProtectedRoute with `allowedRoles` for admin pages
-- Resume upload path: `{user_id}/{timestamp}-{filename}` so RLS can scope
-- Zod validation on all forms
+---
 
-### Technical notes
+## Phase 6 — Homepage Stats + Trust Section
 
-- Use `react-query` (already in project) for fetching/caching
-- Resume upload via `supabase.storage.from('resumes').upload(...)`, get signed URL for admin viewing
-- File size limit 5MB, PDF only client-side check
+- Live counters fetched from Supabase (`academy_courses` count, distinct `academy_enrollments.user_id`, `academy_certificates` count, `internship_certificates` count, sum of `duration_estimate` parsed to hours)
+- New trust components: testimonials carousel, certificate showcase strip, placement stories, partner logos, instructor profiles grid
+- For content I don't have data for (testimonials, placement stories, partner logos), I'll scaffold the components with clearly-marked sample data and a TODO for you to fill in — I will **not** invent fake reviews or fabricate partner names.
+
+---
+
+## Phase 7 — Performance polish
+
+- `<img loading="lazy" decoding="async">` on all course thumbnails
+- Route-level code splitting via `React.lazy` for Academy public routes
+- Slug-based course URLs (already in Phase 2)
+
+---
+
+## Open questions before I start
+
+1. **INR conversion**: existing `price` values are already in INR (just re-label), or convert × 83? *(Default: re-label only.)*
+2. **Phase scope**: ship all 7 phases now, or just Phase 1+2+3+4 (currency + public discovery + SEO + sitemap) and defer 5–7? *(Default: ship all 7.)*
+3. **Sample data for trust section**: scaffold with placeholders, or skip those components until you provide real content? *(Default: scaffold with clearly-marked placeholders.)*
+
+Reply with answers (or "go ahead with defaults") and I'll start implementing. This will involve a database migration, several new files, and edits across ~15 existing files.

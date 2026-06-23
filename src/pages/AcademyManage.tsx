@@ -300,7 +300,7 @@ export default function AcademyManage() {
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label>Price ($)</Label>
+                    <Label>Price (₹)</Label>
                     <Input type="number" min="0" value={courseForm.price} onChange={(e) => setCourseForm({ ...courseForm, price: e.target.value })} />
                   </div>
                   <div>

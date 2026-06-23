@@ -59,7 +59,11 @@ export type Database = {
           is_featured: boolean
           is_published: boolean
           learning_outcomes: string[] | null
+          meta_description: string | null
+          original_price: number | null
           price: number
+          rating: number | null
+          slug: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
@@ -76,7 +80,11 @@ export type Database = {
           is_featured?: boolean
           is_published?: boolean
           learning_outcomes?: string[] | null
+          meta_description?: string | null
+          original_price?: number | null
           price?: number
+          rating?: number | null
+          slug?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
@@ -93,7 +101,11 @@ export type Database = {
           is_featured?: boolean
           is_published?: boolean
           learning_outcomes?: string[] | null
+          meta_description?: string | null
+          original_price?: number | null
           price?: number
+          rating?: number | null
+          slug?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string

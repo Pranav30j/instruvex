@@ -20,7 +20,7 @@ const plans = [
   },
   {
     name: "Professional",
-    price: "$49",
+    price: "₹3,999",
     period: "/mo",
     desc: "For growing institutions",
     features: [
