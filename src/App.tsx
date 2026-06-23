@@ -51,6 +51,9 @@ import AttendanceReport from "./pages/AttendanceReport";
 import TermsAndConditions from "./pages/legal/TermsAndConditions";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import RefundPolicy from "./pages/legal/RefundPolicy";
+import AcademyCatalog from "./pages/academy/AcademyCatalog";
+import AcademyCategory from "./pages/academy/AcademyCategory";
+import PublicCourseDetail from "./pages/academy/PublicCourseDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -78,6 +81,9 @@ const App = () => (
             <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/academy" element={<AcademyCatalog />} />
+            <Route path="/academy/course/:slugOrId" element={<PublicCourseDetail />} />
+            <Route path="/academy/:categorySlug" element={<AcademyCategory />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/auth/callback" element={<AuthCallback />} />

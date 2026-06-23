@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "@/hooks/use-toast";
 import QuizTaker from "@/components/academy/QuizTaker";
+import { formatINR } from "@/lib/currency";
 import {
   BookOpen, Clock, GraduationCap, Play, CheckCircle2, FileText,
   Download, Lock, ArrowLeft, BarChart3, HelpCircle, Award, Trophy,
@@ -280,10 +281,10 @@ export default function AcademyCourseDetail() {
               <Card className="border-border bg-card">
                 <CardContent className="p-4 space-y-3">
                   {course.price > 0 && (
-                    <p className="text-center font-display text-2xl font-bold text-foreground">${course.price}</p>
+                    <p className="text-center font-display text-2xl font-bold text-foreground">{formatINR(course.price)}</p>
                   )}
                   <Button className="w-full" onClick={() => enrollMutation.mutate()} disabled={enrollMutation.isPending}>
-                    {course.price > 0 ? `Enroll – $${course.price}` : "Enroll Free"}
+                    {course.price > 0 ? `Enroll – ${formatINR(course.price)}` : "Enroll Free"}
                   </Button>
                 </CardContent>
               </Card>
