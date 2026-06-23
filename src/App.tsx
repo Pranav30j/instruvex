@@ -48,6 +48,9 @@ import AttendanceHome from "./pages/AttendanceHome";
 import TakeAttendance from "./pages/TakeAttendance";
 import ManageAttendance from "./pages/ManageAttendance";
 import AttendanceReport from "./pages/AttendanceReport";
+import TermsAndConditions from "./pages/legal/TermsAndConditions";
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import RefundPolicy from "./pages/legal/RefundPolicy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +75,9 @@ const App = () => (
             <Route path="/careers/:id" element={<CareerDetail />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
