@@ -1,99 +1,144 @@
+# ATS Resume Score Checker
 
-# Instruvex Academy Upgrade Plan
+A production-ready, explainable resume analyzer built into Instruvex — matching the existing dark/metallic navy theme, blue accents, glassmorphism, and Space Grotesk/Inter typography.
 
-A large, multi-part upgrade. I'll ship it in coherent phases so each is reviewable and testable. Let me know if you'd like any phase deferred or expanded.
+## Scope
 
----
+- Public tool (no login required) with an optional saved-history dashboard for logged-in users.
+- Deterministic, weighted scoring engine (100 pts) with AI-augmented qualitative feedback via Lovable AI Gateway (`google/gemini-3-flash-preview`).
+- Beautiful PDF report export.
 
-## Phase 1 — INR Currency Conversion (no data migration)
+## Architecture
 
-Replace `$` with `₹` everywhere prices are rendered. Prices stay in the existing `price` numeric column — we simply re-interpret/format them as INR. No DB migration needed unless you want me to convert existing values mathematically.
+Modular so future modules (Resume Builder, JD Match, Rewriter, Cover Letter, Interview Prep) can reuse the same primitives.
 
-Files to update:
-- `src/pages/AcademyHome.tsx` — course cards (`$${price}`, `Enroll – $`)
-- `src/pages/AcademyCourseDetail.tsx` — detail price + checkout
-- `src/pages/AcademyCourseCreate.tsx` — form label "Price (USD)" → "Price (INR)"
-- `src/pages/AcademyManage.tsx` — listings
-- `src/components/landing/PricingSection.tsx` — subscription plans
-- Any revenue/admin dashboards rendering currency
-- New helper: `src/lib/currency.ts` exporting `formatINR(n)` → `₹1,234` (uses `Intl.NumberFormat('en-IN')`)
+```
+src/
+  pages/
+    ATSChecker.tsx              # /ats-checker public page
+    dashboard/ResumeHistory.tsx # /dashboard/resume-history
+  components/ats/
+    ResumeUploader.tsx          # dropzone, validation, progress
+    ProcessingStages.tsx        # animated stage list
+    ScoreCircle.tsx             # animated circular score
+    CategoryBar.tsx             # progress bar row
+    SectionCard.tsx             # status + explanation + suggestions
+    KeywordCloud.tsx
+    SuggestionCard.tsx          # before/after + copy
+    StrengthsWarnings.tsx
+    ReportExport.tsx            # PDF (jsPDF + html2canvas)
+  lib/ats/
+    extract.ts                  # pdfjs-dist + mammoth text extraction
+    scoring/
+      index.ts                  # runAllChecks -> { total, categories, findings }
+      contact.ts   (10)
+      sections.ts  (15)
+      formatting.ts(15)
+      readability.ts(10)
+      skills.ts    (15)
+      experience.ts(15)
+      projects.ts  (10)
+      education.ts (5)
+      compliance.ts(5)
+      skillsTaxonomy.ts
+    types.ts
 
-**Question for you:** Are existing course prices already INR values (just displayed with $), or do they need mathematical conversion (× ~83)? I'll assume **values are already INR** and only swap the symbol unless you tell me otherwise.
+supabase/functions/
+  ats-analyze/index.ts          # optional AI enrichment (qualitative feedback + rewrites)
 
----
+new landing section:
+  src/components/landing/ATSCheckerSection.tsx   # hero card CTA on /
+```
 
-## Phase 2 — Public Academy Discovery (no login required)
+## Scoring engine (deterministic, 100 pts)
 
-New public routes:
-- `/academy` — public Academy home with hero, featured courses, full catalog, filters, search
-- `/academy/course/:slug` — public course detail page (currently `/dashboard/academy/course/:id`, dashboard route preserved)
-- `/academy/:category` — SEO category landing pages (data-science, ai, web-development, programming, gate-preparation)
+Each check returns `{ score, max, passed[], failed[], suggestions[] }` so every point is traceable. Weights match the spec: Contact 10, Sections 15, Formatting 15, Readability 10, Skills 15, Experience 15, Projects 10, Education 5, Compliance 5.
 
-DB migration:
-- Add `slug TEXT UNIQUE` to `academy_courses`, auto-populated from title (backfill existing rows)
-- Add `original_price NUMERIC` (for discount badge), `rating NUMERIC`, `enrolled_count` (computed view or denormalized counter)
-- Adjust `academy_courses` SELECT RLS to allow `anon` to read `is_published = true` rows (currently auth-only). Same for `academy_modules`/`academy_lectures` metadata used on the public detail page — lecture **content** stays gated.
+Techniques:
+- **Contact**: regex for email, phone (intl), LinkedIn/GitHub/portfolio URLs, location heuristic.
+- **Sections**: keyword header detection (Summary, Skills, Experience, Projects, Education, Certifications, Achievements, Languages).
+- **Formatting**: from PDF structure — column count via pdfjs text-item x-positions, image count, table detection, font-size distribution, bullet consistency. DOCX: mammoth warnings + tag inspection.
+- **Readability**: sentence length, passive-voice regex, weak-verb list, buzzword frequency, repeated phrases (n-gram).
+- **Skills**: match against curated taxonomy (Programming/Frameworks/Cloud/DB/Tools/AI-ML/Data/Soft).
+- **Experience**: action-verb list, quantified metrics regex (`\d+%|\$\d+|\d+\+`), bullet strength.
+- **Projects**: title/desc/tech/GitHub-link/impact detection.
+- **Education**: degree + institute + year regex.
+- **Compliance**: length (300–1200 words ideal), section order sanity, professionalism heuristics.
 
-Homepage integration:
-- New `src/components/landing/FeaturedCoursesSection.tsx` injected into `src/pages/Index.tsx` between `AcademySection` and `PricingSection`
-- Fetches up to 8 published courses, ordered by `is_featured DESC, created_at DESC`
-- Card shows: thumbnail, title, instructor, category, duration, lecture count, level, ₹ price, discount badge, rating, enrolled count, View / Enroll buttons
+## AI enrichment (edge function)
 
----
+`ats-analyze` takes extracted text + deterministic findings, returns:
+- Rewritten bullet suggestions (before/after) for weak experience lines.
+- Recruiter-impression paragraph.
+- Prioritized top-5 recommendations.
 
-## Phase 3 — SEO Foundation
+Uses `google/gemini-3-flash-preview` via Lovable AI Gateway with structured output (Zod schema, capped/clamped in code — no schema length bounds). Graceful fallback: if AI fails, the deterministic report still renders fully.
 
-- Install `react-helmet-async`, wrap app in `<HelmetProvider>` in `src/main.tsx`
-- Per-route `<Helmet>` on: Index, `/academy`, `/academy/course/:slug`, `/academy/:category`, About, Blog, BlogPost, Careers, CareerDetail, Contact, legal pages
-- Structured data:
-  - Sitewide `Organization` + `WebSite` in `index.html` (keep existing)
-  - Per-course `Course` schema (name, description, provider, instructor, price `priceCurrency: INR`, duration, aggregateRating)
-  - Per-category `ItemList` schema
-- Canonical + og:url self-reference each route
-- Homepage meta title/description tuned to target keywords listed in the brief
+## Upload & extraction (client-side)
 
----
+- `react-dropzone` for drag/drop.
+- Client-side extraction to keep it snappy and to avoid uploading rejected files:
+  - PDF: `pdfjs-dist` (also gives layout metrics for formatting checks).
+  - DOCX: `mammoth` (raw text + messages).
+- Validation: MIME + extension, ≤10MB, encrypted PDF detection (pdfjs throws PasswordException), corruption catch.
+- Processing stages animated via Framer Motion; each stage resolves as its promise completes.
 
-## Phase 4 — Dynamic sitemap + robots
+## Database (Lovable Cloud / Supabase)
 
-- Create `scripts/generate-sitemap.ts` that runs on `predev` / `prebuild`
-- Pulls all published courses + categories from Supabase using `SUPABASE_URL` + anon key (read-only public data) and writes `public/sitemap.xml`
-- Static entries: `/`, `/about`, `/blog`, `/contact`, `/careers`, `/verify`, `/academy`, `/terms-and-conditions`, `/privacy-policy`, `/refund-policy`
-- Dynamic: every published course slug, every category page, every published blog post
-- `public/robots.txt` already correct; add nothing besides confirming the sitemap URL
+New table `resume_analyses` — only used when the user is logged in; anonymous users get results in-memory only.
 
----
+```
+resume_analyses
+  id uuid pk
+  user_id uuid -> auth.users
+  file_name text
+  file_size int
+  overall_score int
+  category_scores jsonb   -- { contact: {score,max}, ... }
+  strengths text[]
+  warnings text[]
+  suggestions jsonb       -- [{before, after, section}]
+  ai_summary text
+  resume_text text        -- extracted plaintext (for future re-analysis)
+  created_at timestamptz
+```
 
-## Phase 5 — Search, Filters, Sort
+RLS: users can only read/insert/delete their own rows. GRANTs to authenticated + service_role. Optionally store the original file in a private `resumes-ats` bucket (owner-scoped path `${user_id}/${uuid}.pdf`).
 
-Already partially present in dashboard Academy; build a richer version on `/academy`:
-- Search box (title + description)
-- Filters: category, price (free / paid / range), duration bucket, difficulty
-- Sort: popularity (enrolled_count desc), latest, price asc/desc
-- URL-synced filter state (`?category=ai&sort=latest`) so filtered views are linkable + indexable
+## PDF report
 
----
+Client-side generation with `jspdf` + `html2canvas` from a hidden print-styled component. Includes: cover with Instruvex logo, score dial, category chart, strengths/warnings, section analysis, suggestions, footer branding.
 
-## Phase 6 — Homepage Stats + Trust Section
+## Routing & entry points
 
-- Live counters fetched from Supabase (`academy_courses` count, distinct `academy_enrollments.user_id`, `academy_certificates` count, `internship_certificates` count, sum of `duration_estimate` parsed to hours)
-- New trust components: testimonials carousel, certificate showcase strip, placement stories, partner logos, instructor profiles grid
-- For content I don't have data for (testimonials, placement stories, partner logos), I'll scaffold the components with clearly-marked sample data and a TODO for you to fill in — I will **not** invent fake reviews or fabricate partner names.
+- Add `/ats-checker` public route in `src/App.tsx`.
+- Add `ATSCheckerSection` above the existing hero/products stack on the landing page (`src/pages/Index.tsx`) with the specified title/subtitle and CTA.
+- Add `/dashboard/resume-history` (authenticated) with a sidebar link in `DashboardLayout` visible to all roles.
 
----
+## Design tokens
 
-## Phase 7 — Performance polish
+Reuse existing tokens (`--steel`, `--card-gradient`, `--hero`, `--shadow-card`). No hardcoded colors. Framer Motion for stage transitions, score count-up, and bar fills. Glassmorphism card on hero. Fully responsive (mobile stacks category bars, keeps circular score centered).
 
-- `<img loading="lazy" decoding="async">` on all course thumbnails
-- Route-level code splitting via `React.lazy` for Academy public routes
-- Slug-based course URLs (already in Phase 2)
+## Accessibility & performance
 
----
+- Keyboard-accessible dropzone + focus rings.
+- ARIA live region announces stage progress and final score.
+- Lazy-load `pdfjs-dist`, `mammoth`, `jspdf`, `html2canvas` via dynamic `import()` so the landing page stays light.
+- Score computation runs in a `requestIdleCallback` chunked loop for very large resumes.
 
-## Open questions before I start
+## Deliverables (implementation order)
 
-1. **INR conversion**: existing `price` values are already in INR (just re-label), or convert × 83? *(Default: re-label only.)*
-2. **Phase scope**: ship all 7 phases now, or just Phase 1+2+3+4 (currency + public discovery + SEO + sitemap) and defer 5–7? *(Default: ship all 7.)*
-3. **Sample data for trust section**: scaffold with placeholders, or skip those components until you provide real content? *(Default: scaffold with clearly-marked placeholders.)*
+1. Migration: `resume_analyses` table + RLS + private storage bucket.
+2. Install deps: `pdfjs-dist`, `mammoth`, `react-dropzone`, `jspdf`, `html2canvas`.
+3. Scoring library + skills taxonomy + types.
+4. Client extraction module.
+5. UI primitives (ScoreCircle, CategoryBar, SectionCard, SuggestionCard, KeywordCloud, ProcessingStages, ResumeUploader).
+6. `/ats-checker` page composing everything + PDF export.
+7. Edge function `ats-analyze` for AI enrichment.
+8. Landing section + route wiring.
+9. Dashboard history page + sidebar link.
+10. Verification pass: build, lint, quick Playwright smoke of the upload flow with a sample PDF.
 
-Reply with answers (or "go ahead with defaults") and I'll start implementing. This will involve a database migration, several new files, and edits across ~15 existing files.
+## Out of scope for this iteration (kept modular for later)
+
+Resume Builder, JD matching, full rewrite/cover-letter generation, interview prep — components and types are designed so those slot in without refactors.
