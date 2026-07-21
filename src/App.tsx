@@ -54,6 +54,8 @@ import RefundPolicy from "./pages/legal/RefundPolicy";
 import AcademyCatalog from "./pages/academy/AcademyCatalog";
 import AcademyCategory from "./pages/academy/AcademyCategory";
 import PublicCourseDetail from "./pages/academy/PublicCourseDetail";
+import ATSChecker from "./pages/ATSChecker";
+import ResumeHistory from "./pages/dashboard/ResumeHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,6 +86,7 @@ const App = () => (
             <Route path="/academy" element={<AcademyCatalog />} />
             <Route path="/academy/course/:slugOrId" element={<PublicCourseDetail />} />
             <Route path="/academy/:categorySlug" element={<AcademyCategory />} />
+            <Route path="/ats-checker" element={<ATSChecker />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
@@ -215,6 +218,10 @@ const App = () => (
             <Route
               path="/dashboard/careers/my-applications"
               element={<ProtectedRoute><MyApplications /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/resume-history"
+              element={<ProtectedRoute><ResumeHistory /></ProtectedRoute>}
             />
           </Routes>
         </AuthProvider>

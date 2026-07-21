@@ -1513,6 +1513,51 @@ export type Database = {
           },
         ]
       }
+      resume_analyses: {
+        Row: {
+          ai_summary: string | null
+          category_scores: Json
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          overall_score: number
+          resume_text: string | null
+          strengths: string[]
+          suggestions: Json
+          user_id: string
+          warnings: string[]
+        }
+        Insert: {
+          ai_summary?: string | null
+          category_scores?: Json
+          created_at?: string
+          file_name: string
+          file_size?: number
+          id?: string
+          overall_score?: number
+          resume_text?: string | null
+          strengths?: string[]
+          suggestions?: Json
+          user_id: string
+          warnings?: string[]
+        }
+        Update: {
+          ai_summary?: string | null
+          category_scores?: Json
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          overall_score?: number
+          resume_text?: string | null
+          strengths?: string[]
+          suggestions?: Json
+          user_id?: string
+          warnings?: string[]
+        }
+        Relationships: []
+      }
       student_answers: {
         Row: {
           code_answer: string | null

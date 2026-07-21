@@ -11,6 +11,7 @@ import StatsSection from "@/components/landing/StatsSection";
 import PricingSection from "@/components/landing/PricingSection";
 import BookDemoSection from "@/components/landing/BookDemoSection";
 import BlogPreviewSection from "@/components/landing/BlogPreviewSection";
+import ATSCheckerSection from "@/components/landing/ATSCheckerSection";
 import Footer from "@/components/landing/Footer";
 import StickyDemoCTA from "@/components/landing/StickyDemoCTA";
 import SEO from "@/components/SEO";
@@ -63,6 +64,7 @@ const Index = () => (
     <WhyInstruvexSection />
     <SocialProofSection />
     <AcademySection />
+    <ATSCheckerSection />
     <PricingSection />
     <BookDemoSection />
     <BlogPreviewSection />
