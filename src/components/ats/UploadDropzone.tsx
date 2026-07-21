@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
-import { useDropzone } from "react-dropzone";
 import { Upload, FileText, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { useDropzone } from "react-dropzone";
 
 interface Props {
   onFile: (f: File) => void;
@@ -33,10 +32,9 @@ export default function UploadDropzone({ onFile, loading }: Props) {
 
   return (
     <div>
-      <motion.div
+      <div
         {...getRootProps()}
-        whileHover={{ scale: loading ? 1 : 1.01 }}
-        className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-10 text-center transition-colors ${
+        className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-10 text-center transition-all hover:scale-[1.01] ${
           isDragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 bg-card/40"
         } ${loading ? "opacity-70 pointer-events-none" : ""}`}
       >
@@ -63,7 +61,7 @@ export default function UploadDropzone({ onFile, loading }: Props) {
             </button>
           )}
         </div>
-      </motion.div>
+      </div>
       {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
     </div>
   );
