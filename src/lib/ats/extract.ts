@@ -11,8 +11,7 @@ export async function extractResume(file: File): Promise<ExtractedResume> {
 }
 
 async function extractPdf(file: File): Promise<ExtractedResume> {
-  const pdfjs = await import("pdfjs-dist");
-  // @ts-expect-error - runtime worker src
+  const pdfjs: any = await import("pdfjs-dist");
   pdfjs.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
   const buf = await file.arrayBuffer();
   let doc;
