@@ -32,4 +32,3 @@ export function scoreExperience(text: string): CheckResult & { weakBullets: stri
 
   return { key: "experience", label: "Experience", score: Math.min(score, 15), max: 15, passed, failed, weakBullets };
 }
-*** End Patch

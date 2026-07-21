@@ -77,4 +77,3 @@ function deriveImpression(score: number) {
   if (score >= 60) return "Passable, but noticeable gaps in structure and impact.";
   return "Significant improvements needed before applying.";
 }
-*** End Patch

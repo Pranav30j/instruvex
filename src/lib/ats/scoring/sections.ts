@@ -20,4 +20,3 @@ export function scoreSections(text: string): CheckResult {
 }
 
 function cap(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }
-*** End Patch

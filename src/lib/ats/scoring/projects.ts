@@ -32,4 +32,3 @@ export function scoreProjects(text: string): CheckResult {
 
   return { key: "projects", label: "Projects", score: Math.min(score, 10), max: 10, passed, failed };
 }
-*** End Patch

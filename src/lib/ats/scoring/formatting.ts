@@ -37,4 +37,3 @@ export function scoreFormatting(extracted: ExtractedResume): CheckResult {
 
   return { key: "formatting", label: "Formatting", score: Math.max(0, Math.min(score, 15)), max: 15, passed, failed };
 }
-*** End Patch

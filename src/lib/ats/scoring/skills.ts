@@ -40,4 +40,3 @@ export function scoreSkills(text: string): SkillsAnalysis {
 }
 
 function escape(s: string) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
-*** End Patch

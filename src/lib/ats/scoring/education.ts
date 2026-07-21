@@ -27,4 +27,3 @@ export function scoreEducation(text: string): CheckResult {
 
   return { key: "education", label: "Education", score: Math.min(score, 5), max: 5, passed, failed };
 }
-*** End Patch

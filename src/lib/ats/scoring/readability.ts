@@ -33,4 +33,3 @@ export function scoreReadability(text: string): CheckResult {
 
   return { key: "readability", label: "Readability", score: Math.max(0, Math.min(score, 10)), max: 10, passed, failed };
 }
-*** End Patch

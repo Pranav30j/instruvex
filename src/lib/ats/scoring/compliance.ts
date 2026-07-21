@@ -19,4 +19,3 @@ export function scoreCompliance(text: string, wordCount: number): CheckResult {
 
   return { key: "compliance", label: "Overall Compliance", score: Math.max(0, Math.min(score, 5)), max: 5, passed, failed };
 }
-*** End Patch

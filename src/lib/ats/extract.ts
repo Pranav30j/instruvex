@@ -96,4 +96,3 @@ async function extractDocx(file: File): Promise<ExtractedResume> {
     throw new Error("Could not read the DOCX file. It may be corrupted.");
   }
 }
-*** End Patch
