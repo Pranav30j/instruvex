@@ -1,6 +1,10 @@
 import type { ExtractedResume } from "./types";
 
-const PDF_WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.mjs";
+// Worker must match the installed pdfjs-dist version exactly, so bundle it locally.
+const PDF_WORKER_URL = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
 
 export async function extractResume(file: File): Promise<ExtractedResume> {
   const name = file.name.toLowerCase();
@@ -19,7 +23,8 @@ async function extractPdf(file: File): Promise<ExtractedResume> {
     doc = await pdfjs.getDocument({ data: buf }).promise;
   } catch (e: any) {
     if (e?.name === "PasswordException") throw new Error("This PDF is password protected. Please remove the password and try again.");
-    throw new Error("Could not read the PDF. The file may be corrupted.");
+    console.error("PDF parse failed", e);
+    throw new Error(`Could not read the PDF: ${e?.message || "unknown error"}`);
   }
 
   const warnings: string[] = [];
