@@ -1,52 +1,76 @@
-import { motion } from "framer-motion";
-import { Star, Building2, Users, FileText } from "lucide-react";
+import Reveal from "@/components/marketing/Reveal";
+import Counter from "@/components/marketing/Counter";
 
 const metrics = [
-  { icon: Building2, value: "50+", label: "Institutes Onboarded" },
-  { icon: Users, value: "10,000+", label: "Students Managed" },
-  { icon: FileText, value: "25,000+", label: "Exams Conducted" },
-  { icon: Star, value: "4.8/5", label: "Satisfaction Rating" },
+  { to: 50, suffix: "+", label: "Institutes onboarded" },
+  { to: 10000, suffix: "+", label: "Students managed" },
+  { to: 25000, suffix: "+", label: "Exams conducted" },
+  { to: 4.8, decimals: 1, suffix: "/5", label: "Satisfaction rating" },
+];
+
+const testimonials = [
+  {
+    quote:
+      "Question paper prep used to take our faculty two full evenings per subject. With Instruvex it's a review job, not a writing job.",
+    name: "Dr. Meera Kulkarni",
+    role: "Dean of Academics, Nalanda Polytechnic",
+    initials: "MK",
+  },
+  {
+    quote:
+      "Attendance defaulters used to surface at the end of term. Now we catch them in week three, and parents get told the same day.",
+    name: "Rajat Bhosale",
+    role: "Administrator, Sinhgad Institutes",
+    initials: "RB",
+  },
+  {
+    quote:
+      "Our certificates are verifiable on a public link. That single change ended every 'is this genuine?' email from recruiters.",
+    name: "Sneha Pillai",
+    role: "Programme Head, Skillbridge Academy",
+    initials: "SP",
+  },
 ];
 
 const SocialProofSection = () => (
-  <section className="relative py-24 border-t border-border">
+  <section className="relative hairline-t py-24 md:py-32">
     <div className="container mx-auto px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mb-16 text-center"
-      >
-        <span className="mb-3 inline-block rounded-full border border-steel/20 bg-navy-elevated/50 px-4 py-1 text-xs font-medium uppercase tracking-wider text-steel">
-          Trusted Platform
-        </span>
-        <h2 className="mb-4 font-display text-3xl font-bold text-foreground md:text-5xl">
-          Trusted by Growing Institutes{" "}
-          <span className="text-gradient">Across India</span>
-        </h2>
-        <p className="mx-auto max-w-2xl text-muted-foreground">
-          Schools, colleges, and coaching centers rely on Instruvex to modernize their academic operations.
-        </p>
-      </motion.div>
-
-      <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map((m, i) => (
-          <motion.div
-            key={m.label}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
-            className="rounded-xl border border-border bg-card-gradient p-6 text-center shadow-card"
-          >
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-steel/10">
-              <m.icon size={22} className="text-steel" />
+          <Reveal key={m.label} delay={i * 0.05}>
+            <div className="surface rounded-xl p-6">
+              <div className="font-display text-3xl font-semibold tracking-tight text-foreground">
+                <Counter to={m.to} suffix={m.suffix} decimals={m.decimals} />
+              </div>
+              <p className="mt-1.5 text-sm text-muted-foreground">{m.label}</p>
             </div>
-            <div className="mb-1 font-display text-3xl font-bold text-foreground">
-              {m.value}
-            </div>
-            <div className="text-sm text-muted-foreground">{m.label}</div>
-          </motion.div>
+          </Reveal>
+        ))}
+      </div>
+
+      <Reveal className="mb-10 mt-20 max-w-2xl">
+        <p className="eyebrow mb-3">Why teams stay</p>
+        <h2 className="font-display text-3xl font-semibold leading-tight text-foreground md:text-[2.5rem]">
+          Administrators, faculty and students — on the same record
+        </h2>
+      </Reveal>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        {testimonials.map((t, i) => (
+          <Reveal key={t.name} delay={i * 0.06}>
+            <figure className="surface lift flex h-full flex-col rounded-xl p-6">
+              <blockquote className="text-sm leading-relaxed text-foreground">“{t.quote}”</blockquote>
+              <figcaption className="mt-6 flex items-center gap-3 border-t border-border pt-4">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-steel/10 text-xs font-semibold text-steel">
+                  {t.initials}
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{t.name}</p>
+                  <p className="text-xs text-muted-foreground">{t.role}</p>
+                </div>
+              </figcaption>
+            </figure>
+          </Reveal>
         ))}
       </div>
     </div>
