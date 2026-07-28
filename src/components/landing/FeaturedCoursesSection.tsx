@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import Reveal from "@/components/marketing/Reveal";
 import CourseCard from "@/components/academy/CourseCard";
 import {
   usePublishedCourses,
@@ -17,26 +17,23 @@ const FeaturedCoursesSection = () => {
   const { data: enrollmentCounts = {} } = useCourseEnrollmentCounts();
 
   return (
-    <section id="featured-courses" className="relative py-24">
-      <div className="pointer-events-none absolute right-0 top-1/3 h-[400px] w-[400px] rounded-full bg-steel/5 blur-[150px]" />
+    <section id="featured-courses" className="relative hairline-t py-24 md:py-28">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-12 text-center"
-        >
-          <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-steel/20 bg-navy-elevated/50 px-4 py-1 text-xs font-medium uppercase tracking-wider text-steel">
-            <Sparkles size={12} /> Academy
-          </span>
-          <h2 className="mb-4 font-display text-3xl font-bold text-foreground md:text-5xl">
-            Featured Instruvex <span className="text-gradient">Academy Courses</span>
-          </h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground">
-            Industry-recognized certification courses in AI, Data Science, Web Development, and GATE preparation —
-            with hands-on projects and verifiable certificates.
-          </p>
-        </motion.div>
+        <Reveal className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <p className="eyebrow mb-3">Academy</p>
+            <h2 className="font-display text-3xl font-semibold leading-tight text-foreground md:text-[2.5rem]">
+              Certification courses students actually complete
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              AI, Data Science, Web Development and GATE preparation — hands-on projects, INR pricing, and
+              certificates anyone can verify.
+            </p>
+          </div>
+          <Link to="/academy" className="nav-underline hidden shrink-0 text-sm font-medium text-steel md:inline-block">
+            View all courses →
+          </Link>
+        </Reveal>
 
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -63,7 +60,7 @@ const FeaturedCoursesSection = () => {
           </div>
         )}
 
-        <div className="mt-10 text-center">
+        <div className="mt-10 text-center md:hidden">
           <Link to="/academy">
             <Button variant="hero" size="lg" className="gap-2">
               Browse All Courses <ArrowRight size={18} />
