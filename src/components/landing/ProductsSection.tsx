@@ -1,121 +1,103 @@
-import { motion } from "framer-motion";
-import {
-  ClipboardCheck,
-  Users,
-  BarChart3,
-  Brain,
-  FileText,
-  Award,
-  BookOpen,
-  Play,
-  TrendingUp,
-} from "lucide-react";
+import { Link } from "react-router-dom";
+import Reveal from "@/components/marketing/Reveal";
+import BrowserFrame from "@/components/marketing/BrowserFrame";
+import ExamBuilderDemo from "@/components/marketing/demos/ExamBuilderDemo";
+import AttendanceDemo from "@/components/marketing/demos/AttendanceDemo";
+import CoursePlayerDemo from "@/components/marketing/demos/CoursePlayerDemo";
 
 const products = [
   {
-    tag: "Instruvex ERP",
-    title: "Smart Institute Management",
+    tag: "Instruvex Exams",
+    title: "Question papers written by AI, owned by your faculty",
     description:
-      "Digitize attendance, manage students across batches and departments, and gain real-time visibility into institute operations.",
-    features: [
-      { icon: ClipboardCheck, text: "Automated attendance tracking with lecture-wise logging" },
-      { icon: Users, text: "Student, batch, and department management" },
-      { icon: BarChart3, text: "Attendance analytics with CSV export & low-attendance alerts" },
+      "Describe the syllabus and difficulty. Get MCQ, subjective, coding and case-study questions tagged by Bloom's level — every one editable before it ships.",
+    points: [
+      "Proctoring with fullscreen lock and tab-switch tracking",
+      "Code execution grading and semantic scoring for written answers",
+      "Plagiarism similarity analysis across the whole cohort",
     ],
-    gradient: "from-steel to-cyan-accent",
+    url: "instruvex.in/dashboard/exams/create",
+    href: "/#book-demo",
+    linkLabel: "See the exam engine",
+    Demo: ExamBuilderDemo,
   },
   {
-    tag: "Instruvex Exams",
-    title: "AI-Powered Examination System",
+    tag: "Instruvex ERP",
+    title: "Institute operations that stop living in spreadsheets",
     description:
-      "Create university-level exams with MCQ, subjective, coding, and case-study questions — powered by AI generation and auto-evaluation.",
-    features: [
-      { icon: Brain, text: "AI question generation with Bloom's taxonomy tagging" },
-      { icon: FileText, text: "Anti-cheat proctoring, tab detection & plagiarism analysis" },
-      { icon: Award, text: "Instant grading with semantic scoring & code execution" },
+      "Departments, batches, students and daily attendance in one hierarchy — with row-level isolation so every institute sees only its own data.",
+    points: [
+      "Daily and lecture-wise attendance with CSV export",
+      "Automatic warnings when a student drops below 75%",
+      "Assignments, deadlines and submission tracking",
     ],
-    gradient: "from-steel to-steel-glow",
+    url: "instruvex.in/dashboard/attendance",
+    href: "/#book-demo",
+    linkLabel: "Explore the ERP",
+    Demo: AttendanceDemo,
   },
   {
     tag: "Instruvex Academy",
-    title: "Learning & Certification Platform",
+    title: "Courses, quizzes and credentials in one continuous track",
     description:
-      "A full LMS with video courses, quizzes, assignments, progress tracking, and verifiable digital certificates.",
-    features: [
-      { icon: BookOpen, text: "Course builder with modules, lectures, and notes" },
-      { icon: Play, text: "Video-based learning with progress dashboards" },
-      { icon: TrendingUp, text: "Certification engine with QR verification & LinkedIn sharing" },
+      "Build modules and lectures, gate progress behind quizzes, and issue a verifiable certificate the moment a learner passes.",
+    points: [
+      "Resumable video progress across devices",
+      "Passing scores enforced before certification",
+      "INR pricing with public course pages built for search",
     ],
-    gradient: "from-cyan-accent to-steel",
+    url: "instruvex.in/academy/course/ai-machine-learning",
+    href: "/academy",
+    linkLabel: "Browse the Academy",
+    Demo: CoursePlayerDemo,
   },
 ];
 
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.15 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-};
-
 const ProductsSection = () => (
-  <section id="features" className="relative py-24">
-    <div className="pointer-events-none absolute right-0 top-0 h-[400px] w-[400px] rounded-full bg-steel/5 blur-[150px]" />
+  <section id="products" className="relative hairline-t py-24 md:py-32">
     <div className="container mx-auto px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mb-16 text-center"
-      >
-        <span className="mb-3 inline-block rounded-full border border-steel/20 bg-navy-elevated/50 px-4 py-1 text-xs font-medium uppercase tracking-wider text-steel">
-          Our Products
-        </span>
-        <h2 className="mb-4 font-display text-3xl font-bold text-foreground md:text-5xl">
-          Three Products, <span className="text-gradient">One Platform</span>
+      <Reveal className="mb-16 max-w-2xl">
+        <p className="eyebrow mb-3">Three products</p>
+        <h2 className="font-display text-3xl font-semibold leading-tight text-foreground md:text-[2.75rem]">
+          Built as one platform, adopted one module at a time
         </h2>
-        <p className="mx-auto max-w-2xl text-muted-foreground">
-          Everything your institute needs — from classroom operations to AI-driven assessments and student learning.
-        </p>
-      </motion.div>
+      </Reveal>
 
-      <motion.div
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-        className="grid gap-8 lg:grid-cols-3"
-      >
-        {products.map((p) => (
-          <motion.div
+      <div className="space-y-24 md:space-y-32">
+        {products.map((p, i) => (
+          <div
             key={p.tag}
-            variants={item}
-            className="group rounded-xl border border-border bg-card-gradient p-8 shadow-card transition-all duration-300 hover:border-steel/30 hover:shadow-glow"
+            className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16"
           >
-            <div className={`mb-4 inline-block rounded-full bg-gradient-to-r ${p.gradient} px-4 py-1 text-xs font-semibold text-primary-foreground`}>
-              {p.tag}
-            </div>
-            <h3 className="mb-3 font-display text-2xl font-bold text-foreground">
-              {p.title}
-            </h3>
-            <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
-              {p.description}
-            </p>
-            <ul className="space-y-4">
-              {p.features.map((f) => (
-                <li key={f.text} className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-steel/10">
-                    <f.icon size={14} className="text-steel" />
-                  </div>
-                  <span className="text-sm text-foreground">{f.text}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+            <Reveal className={i % 2 === 1 ? "lg:order-2" : undefined}>
+              <p className="eyebrow mb-3">{p.tag}</p>
+              <h3 className="font-display text-2xl font-semibold leading-snug text-foreground md:text-[1.9rem]">
+                {p.title}
+              </h3>
+              <p className="mt-4 text-muted-foreground">{p.description}</p>
+              <ul className="mt-6 space-y-3 border-l border-border pl-5">
+                {p.points.map((pt) => (
+                  <li key={pt} className="text-sm leading-relaxed text-foreground">
+                    {pt}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                to={p.href}
+                className="nav-underline mt-7 inline-block text-sm font-medium text-steel"
+              >
+                {p.linkLabel} →
+              </Link>
+            </Reveal>
+
+            <Reveal delay={0.08} className={i % 2 === 1 ? "lg:order-1" : undefined}>
+              <BrowserFrame url={p.url}>
+                <p.Demo />
+              </BrowserFrame>
+            </Reveal>
+          </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   </section>
 );

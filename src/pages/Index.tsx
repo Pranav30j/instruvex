@@ -1,11 +1,10 @@
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
-import WhatIsInstruvex from "@/components/landing/WhatIsInstruvex";
+import BentoShowcase from "@/components/landing/BentoShowcase";
+import WorkflowTimeline from "@/components/landing/WorkflowTimeline";
 import ProblemSolutionSection from "@/components/landing/ProblemSolutionSection";
 import ProductsSection from "@/components/landing/ProductsSection";
-import WhyInstruvexSection from "@/components/landing/WhyInstruvexSection";
 import SocialProofSection from "@/components/landing/SocialProofSection";
-import AcademySection from "@/components/landing/AcademySection";
 import FeaturedCoursesSection from "@/components/landing/FeaturedCoursesSection";
 import StatsSection from "@/components/landing/StatsSection";
 import PricingSection from "@/components/landing/PricingSection";
@@ -57,13 +56,12 @@ const Index = () => (
     <Navbar />
     <HeroSection />
     <StatsSection />
-    <WhatIsInstruvex />
-    <ProblemSolutionSection />
+    <BentoShowcase />
     <ProductsSection />
+    <WorkflowTimeline />
+    <ProblemSolutionSection />
     <FeaturedCoursesSection />
-    <WhyInstruvexSection />
     <SocialProofSection />
-    <AcademySection />
     <ATSCheckerSection />
     <PricingSection />
     <BookDemoSection />

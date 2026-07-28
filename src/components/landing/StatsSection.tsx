@@ -1,13 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, GraduationCap, Award, Briefcase, Clock } from "lucide-react";
-
-function formatCount(n: number) {
-  if (n >= 100000) return (n / 1000).toFixed(0) + "K+";
-  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K+";
-  return n.toLocaleString("en-IN") + "+";
-}
+import Reveal from "@/components/marketing/Reveal";
+import Counter from "@/components/marketing/Counter";
 
 const StatsSection = () => {
   const { data } = useQuery({
@@ -29,30 +23,24 @@ const StatsSection = () => {
   });
 
   const stats = [
-    { icon: BookOpen, value: data ? formatCount(Math.max(data.courses, 10)) : "10+", label: "Total Courses" },
-    { icon: GraduationCap, value: data ? formatCount(Math.max(data.students, 500)) : "500+", label: "Students Learning" },
-    { icon: Award, value: data ? formatCount(Math.max(data.certificates, 100)) : "100+", label: "Certificates Issued" },
-    { icon: Briefcase, value: data ? formatCount(Math.max(data.internships, 50)) : "50+", label: "Internships Completed" },
-    { icon: Clock, value: "10K+", label: "Learning Hours" },
+    { to: Math.max(data?.courses ?? 0, 10), label: "Courses published" },
+    { to: Math.max(data?.students ?? 0, 500), label: "Students learning" },
+    { to: Math.max(data?.certificates ?? 0, 100), label: "Certificates issued" },
+    { to: Math.max(data?.internships ?? 0, 50), label: "Internships completed" },
+    { to: 10000, label: "Learning hours" },
   ];
 
   return (
-    <section className="relative border-y border-border bg-navy-elevated/30 py-16">
+    <section className="relative hairline-y border-y border-border bg-navy-deep/40 py-14">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-5">
           {stats.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              className="flex flex-col items-center gap-2 text-center"
-            >
-              <s.icon size={24} className="text-steel" />
-              <span className="font-display text-2xl font-bold text-foreground md:text-3xl">{s.value}</span>
-              <span className="text-xs text-muted-foreground md:text-sm">{s.label}</span>
-            </motion.div>
+            <Reveal key={s.label} delay={i * 0.05} className="text-center md:text-left">
+              <div className="font-display text-3xl font-semibold tracking-tight text-foreground">
+                <Counter to={s.to} suffix="+" />
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground md:text-sm">{s.label}</p>
+            </Reveal>
           ))}
         </div>
       </div>
