@@ -3,8 +3,11 @@ import { track as vercelTrack } from "@vercel/analytics";
 /** Analytics only run in production builds. */
 export const analyticsEnabled = import.meta.env.PROD;
 
-const GA_MEASUREMENT_ID = import.meta.env
-  .VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY as string | undefined;
+/** GA4 measurement IDs are publishable, so a hardcoded fallback is safe. */
+const GA_MEASUREMENT_ID =
+  (import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY as
+    | string
+    | undefined) || "G-06MKLBCBC5";
 
 type Props = Record<string, string | number | boolean | null>;
 
