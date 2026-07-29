@@ -6,6 +6,7 @@ import { ArrowRight, Phone } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 const BookDemoSection = () => {
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,7 @@ const BookDemoSection = () => {
         message: `Institute: ${form.institute}\nPhone: ${form.phone}`,
       });
       if (error) throw error;
+      trackEvent(ANALYTICS_EVENTS.bookDemo, { institute: form.institute });
       toast.success("Demo request submitted! We'll contact you soon.");
       setForm({ name: "", institute: "", phone: "", email: "" });
     } catch {

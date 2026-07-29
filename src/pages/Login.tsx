@@ -7,6 +7,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 const getFriendlyLoginError = (message: string) => {
   const normalized = message.toLowerCase();
@@ -46,6 +47,7 @@ const Login = () => {
         toast({ title: "Sign in failed", description: getFriendlyLoginError(error.message), variant: "destructive" });
         return;
       }
+      trackEvent(ANALYTICS_EVENTS.userLogin, { method: "email" });
       navigate("/dashboard");
     } finally {
       setIsLoading(false);
@@ -55,6 +57,7 @@ const Login = () => {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
+      trackEvent(ANALYTICS_EVENTS.userLogin, { method: "google" });
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

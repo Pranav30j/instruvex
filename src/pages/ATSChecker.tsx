@@ -14,6 +14,7 @@ import type { AnalysisResult } from "@/lib/ats/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 const JSONLD = {
   "@context": "https://schema.org",
@@ -37,6 +38,7 @@ export default function ATSChecker() {
     setLoading(true);
     setResult(null);
     setSaved(false);
+    trackEvent(ANALYTICS_EVENTS.atsResumeUploaded, { file_type: file.type || "unknown", size_kb: Math.round(file.size / 1024) });
     try {
       const extracted = await extractResume(file);
       if (!extracted.text || extracted.text.length < 100) {
@@ -44,6 +46,7 @@ export default function ATSChecker() {
       }
       const analysis = analyzeResume(extracted);
       setResult(analysis);
+      trackEvent(ANALYTICS_EVENTS.atsScoreGenerated, { score: analysis.overallScore });
       enrichWithAI(analysis);
     } catch (e) {
       toast({ title: "Analysis failed", description: (e as Error).message, variant: "destructive" });
