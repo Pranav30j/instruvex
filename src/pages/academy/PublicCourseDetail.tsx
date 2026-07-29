@@ -13,6 +13,8 @@ import {
   BookOpen, Clock, GraduationCap, Play, CheckCircle2, Lock, ArrowLeft, BarChart3, Star, Users,
 } from "lucide-react";
 import { formatINR } from "@/lib/currency";
+import { useEffect } from "react";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-500/20 text-emerald-400",
@@ -75,6 +77,12 @@ export default function PublicCourseDetail() {
     },
   });
 
+  useEffect(() => {
+    if (course) {
+      trackEvent(ANALYTICS_EVENTS.courseViewed, { course_id: course.id, title: course.title });
+    }
+  }, [course]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -91,6 +99,7 @@ export default function PublicCourseDetail() {
   const totalLectures = modules.reduce((s: number, m: any) => s + (m.academy_lectures?.length || 0), 0);
   const url = `/academy/course/${course.slug || course.id}`;
   const handleEnroll = () => {
+    trackEvent(ANALYTICS_EVENTS.courseEnrolled, { course_id: course.id, title: course.title, authenticated: !!user });
     if (!user) {
       navigate(`/login?redirect=${encodeURIComponent(`/dashboard/academy/course/${course.id}`)}`);
       return;

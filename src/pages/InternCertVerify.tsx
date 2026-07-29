@@ -1,4 +1,6 @@
 import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +42,12 @@ export default function InternCertVerify() {
       return null;
     },
   });
+
+  useEffect(() => {
+    if (data) {
+      trackEvent(ANALYTICS_EVENTS.certificateVerified, { certificate_id: certificateId ?? "", type: data.type });
+    }
+  }, [data, certificateId]);
 
   if (isLoading) {
     return (

@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Check } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 const plans = [
   {
@@ -53,8 +55,27 @@ const plans = [
   },
 ];
 
-const PricingSection = () => (
-  <section id="pricing" className="relative py-24">
+const PricingSection = () => {
+  const ref = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          trackEvent(ANALYTICS_EVENTS.pricingViewed);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+  <section ref={ref} id="pricing" className="relative py-24">
     <div className="pointer-events-none absolute right-1/4 top-0 h-[400px] w-[400px] rounded-full bg-steel/5 blur-[150px]" />
     <div className="container mx-auto px-4">
       <motion.div
@@ -127,5 +148,6 @@ const PricingSection = () => (
     </div>
   </section>
 );
+};
 
 export default PricingSection;
