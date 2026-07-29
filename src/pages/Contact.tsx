@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -42,6 +43,7 @@ const Contact = () => {
     try {
       const { error } = await supabase.from("contact_submissions" as any).insert(result.data as any);
       if (error) throw error;
+      trackEvent(ANALYTICS_EVENTS.contactFormSubmitted, { subject: result.data.subject });
       toast({ title: "Message sent!", description: "We'll get back to you soon." });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch {

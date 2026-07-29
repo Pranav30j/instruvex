@@ -129,6 +129,7 @@ export default function AcademyCatalog() {
             onSubmit={(e) => {
               e.preventDefault();
               setParam("search", searchInput);
+              if (searchInput.trim()) trackEvent(ANALYTICS_EVENTS.academySearch, { query: searchInput.trim() });
             }}
             className="relative md:col-span-2"
           >

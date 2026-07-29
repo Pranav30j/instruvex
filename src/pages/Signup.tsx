@@ -7,6 +7,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -36,6 +37,7 @@ const Signup = () => {
     if (error) {
       toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
     } else {
+      trackEvent(ANALYTICS_EVENTS.userSignup, { method: "email" });
       toast({ title: "Check your email", description: "We sent you a verification link. Please check your email to confirm your account." });
       navigate("/login");
     }

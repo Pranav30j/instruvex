@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import BrowserFrame from "@/components/marketing/BrowserFrame";
@@ -63,7 +64,7 @@ const HeroSection = () => {
                   Book a demo <ArrowRight size={16} />
                 </Button>
               </a>
-              <Link to="/signup">
+              <Link to="/signup" onClick={() => trackEvent(ANALYTICS_EVENTS.startFreeTrial, { location: "hero" })}>
                 <Button variant="hero-outline" size="lg" className="w-full sm:w-auto">
                   Start free trial
                 </Button>
