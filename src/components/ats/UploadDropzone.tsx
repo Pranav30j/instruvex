@@ -12,19 +12,49 @@ export default function UploadDropzone({ onFile, loading }: Props) {
 
   const onDrop = useCallback((accepted: File[], rejected: any[]) => {
     setError(null);
-    if (rejected.length) {
-      setError("Please upload a PDF or DOCX file under 10 MB.");
-      return;
+    try {
+      if (rejected?.length) {
+        const code = rejected[0]?.errors?.[0]?.code;
+        setError(
+          code === "file-too-large"
+            ? "That file is larger than 10 MB. Please upload a smaller resume."
+            : "Please upload a PDF or DOCX resume under 10 MB."
+        );
+        return;
+      }
+      const file = accepted?.[0];
+      if (!file) {
+        setError("No file was received. Please try selecting the file again.");
+        return;
+      }
+      if (typeof file.size === "number" && file.size === 0) {
+        setError("That file appears to be empty. Please choose another file.");
+        return;
+      }
+      onFile(file);
+    } catch (e) {
+      setError((e as Error)?.message || "Something went wrong reading that file.");
     }
-    if (accepted[0]) onFile(accepted[0]);
   }, [onFile]);
+
+  // Mobile browsers frequently report an empty or generic MIME type, so we
+  // validate by extension too and do real content sniffing during parsing.
+  const validator = (file: File) => {
+    const name = (file?.name || "").toLowerCase();
+    const type = (file?.type || "").toLowerCase();
+    const ok =
+      name.endsWith(".pdf") ||
+      name.endsWith(".docx") ||
+      type === "application/pdf" ||
+      type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+      type === "application/octet-stream" ||
+      type === "";
+    return ok ? null : { code: "file-invalid-type", message: "Only PDF or DOCX files are supported." };
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      "application/pdf": [".pdf"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
-    },
+    validator,
     maxSize: 10 * 1024 * 1024,
     multiple: false,
     disabled: loading,
