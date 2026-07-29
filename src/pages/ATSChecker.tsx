@@ -46,7 +46,7 @@ export default function ATSChecker() {
       }
       const analysis = analyzeResume(extracted);
       setResult(analysis);
-      trackEvent(ANALYTICS_EVENTS.atsScoreGenerated, { score: analysis.totalScore });
+      trackEvent(ANALYTICS_EVENTS.atsScoreGenerated, { score: analysis.score });
       enrichWithAI(analysis);
     } catch (e) {
       toast({ title: "Analysis failed", description: (e as Error).message, variant: "destructive" });
