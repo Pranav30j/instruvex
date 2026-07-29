@@ -68,13 +68,11 @@ const App = () => (
       <Sonner />
       <Analytics />
       <BrowserRouter>
-        <Routes>
-          {/* Public verification routes — NO auth provider */}
-          <Route path="/verify" element={<VerifyPortal />} />
-          <Route path="/verify/:certificateId" element={<InternCertVerify />} />
-        </Routes>
         <AuthProvider>
           <Routes>
+            {/* Public verification routes */}
+            <Route path="/verify" element={<VerifyPortal />} />
+            <Route path="/verify/:certificateId" element={<InternCertVerify />} />
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
