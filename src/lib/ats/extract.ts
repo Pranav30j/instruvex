@@ -2,14 +2,14 @@ import type { ExtractedResume } from "./types";
 
 /**
  * Mobile-safe resume extraction pipeline.
- * - Uses the pdf.js *legacy* build (broader Safari / older Chromium support).
- * - Falls back to worker-less parsing when the module worker cannot boot
- *   (a common cause of "Can't scan" / "Uninitialized variable" on iOS Safari).
+ * - pdf.js 3.11.174 legacy build (last line widely verified on iOS Safari).
+ * - CLASSIC worker (`/pdf.worker.min.js`, served as a static asset) — iOS Safari
+ *   module-worker support is what produced "Uninitialized variable".
  */
-const PDF_WORKER_URL = new URL(
-  "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString();
+const PDF_WORKER_URL = "/pdf.worker.min.js";
+
+/** Last real exception thrown by pdf.js, exposed for production debugging. */
+export let lastPdfError: { name: string; message: string; stack?: string } | null = null;
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
