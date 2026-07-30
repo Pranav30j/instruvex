@@ -125,29 +125,45 @@ export async function extractResume(input: SupportedInput): Promise<ExtractedRes
   return extracted;
 }
 
-async function extractPdfWithRetry(info: NormalizedInput): Promise<ExtractedResume> {
+async function verifyWorkerReachable(): Promise<boolean> {
   try {
-    return await extractPdf(info, false);
+    const res = await fetch(PDF_WORKER_URL, { method: "GET", cache: "force-cache" });
+    log("worker-probe", { url: PDF_WORKER_URL, status: res.status, ok: res.ok, type: res.headers.get("content-type") });
+    return res.ok;
   } catch (e) {
     const err = e instanceof Error ? e : new Error(String(e));
+    log("worker-probe-failed", { url: PDF_WORKER_URL, name: err.name, message: err.message, stack: err.stack });
+    return false;
+  }
+}
+
+async function extractPdfWithRetry(info: NormalizedInput): Promise<ExtractedResume> {
+  const workerOk = await verifyWorkerReachable();
+  try {
+    return await extractPdf(info, !workerOk);
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(String(e));
+    lastPdfError = { name: err.name, message: err.message, stack: err.stack };
+    // Log the ACTUAL exception, unmodified.
+    // eslint-disable-next-line no-console
+    console.error("[ATS] pdf.js exception", err, { name: err.name, message: err.message, stack: err.stack, ...deviceInfo() });
     if (/password|encrypted/i.test(err.message)) throw err;
-    log("pdf-first-attempt-failed", { message: err.message, stack: err.stack });
+    if (!workerOk) throw err;
     try {
-      // Retry without a web worker — fixes most mobile Safari / Samsung Internet failures.
+      // Second pass with the worker fully disabled (main-thread parsing).
       return await extractPdf(info, true);
     } catch (e2) {
       const err2 = e2 instanceof Error ? e2 : new Error(String(e2));
-      log("pdf-retry-failed", { message: err2.message, stack: err2.stack });
-      if (/password|encrypted/i.test(err2.message)) throw err2;
-      throw new Error(
-        "We couldn't read this PDF on your device. Try re-saving it as a standard PDF, or upload a DOCX version."
-      );
+      lastPdfError = { name: err2.name, message: err2.message, stack: err2.stack };
+      // eslint-disable-next-line no-console
+      console.error("[ATS] pdf.js exception (no-worker retry)", err2, { name: err2.name, message: err2.message, stack: err2.stack, ...deviceInfo() });
+      throw err2;
     }
   }
 }
 
 async function extractPdf(info: NormalizedInput, disableWorker: boolean): Promise<ExtractedResume> {
-  const pdfjs: any = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const pdfjs: any = await import("pdfjs-dist/legacy/build/pdf");
   if (!pdfjs || typeof pdfjs.getDocument !== "function") {
     throw new Error("PDF engine failed to load. Please refresh and try again.");
   }
