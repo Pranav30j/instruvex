@@ -183,8 +183,6 @@ async function extractPdf(info: NormalizedInput, disableWorker: boolean): Promis
       data,
       disableWorker,
       isEvalSupported: false,
-      useSystemFonts: false,
-      disableFontFace: true,
     }).promise;
   } catch (e: any) {
     if (e?.name === "PasswordException") {
