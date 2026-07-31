@@ -48,7 +48,7 @@ const HOMEPAGE_JSONLD = [
 const Index = () => (
   <div className="min-h-screen bg-background">
     <SEO
-      title="Instruvex — Online Courses, Certifications & AI ERP Platform in India"
+      title="Instruvex | AI ERP, LMS & Online Exam Platform for Institutes"
       description="Learn AI, Data Science, Web Development, and GATE preparation with Instruvex Academy. Industry-recognized certifications, internships, and an AI-powered ERP & exam platform for schools and colleges in India."
       path="/"
       jsonLd={HOMEPAGE_JSONLD}
