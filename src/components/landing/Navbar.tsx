@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import logoAsset from "@/assets/instruvex-logo.png.asset.json";
 
 const navLinks = [
   { label: "Platform", href: "/#features" },
@@ -32,9 +33,13 @@ const Navbar = () => {
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-steel to-cyan-accent">
-            <span className="font-display text-xs font-bold text-primary-foreground">IX</span>
-          </div>
+          <img
+            src={logoAsset.url}
+            alt="Instruvex logo"
+            className="h-8 w-8 rounded-md object-contain"
+            width={32}
+            height={32}
+          />
           <span className="font-display text-lg font-semibold tracking-tight text-foreground">
             Instruvex
           </span>
