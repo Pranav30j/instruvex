@@ -44,12 +44,15 @@ export default function ExamBuilderDemo() {
       </div>
 
       <div className="space-y-2">
-        {QUESTIONS.slice(0, count).map((item, i) => (
+        {/* All rows stay mounted so the demo never changes document height while
+            the user is scrolling (mobile browsers jump when this happens). */}
+        {QUESTIONS.map((item, i) => (
           <motion.div
             key={item.q}
-            initial={reduce ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={false}
+            animate={reduce ? { opacity: 1 } : { opacity: i < count ? 1 : 0 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            aria-hidden={i >= count}
             className="rounded-md border border-border bg-navy-elevated/40 p-3"
           >
             <div className="flex items-start gap-2.5">
@@ -68,15 +71,18 @@ export default function ExamBuilderDemo() {
           </motion.div>
         ))}
 
-        {generating && (
-          <div className="flex items-center gap-2 rounded-md border border-dashed border-border/70 p-3">
-            <span className="h-3 w-3 animate-spin rounded-full border border-steel/30 border-t-steel" />
-            <span className="text-[11px] text-muted-foreground">
-              Drafting question {count + 1}
-              <span className="animate-caret-blink">▌</span>
-            </span>
-          </div>
-        )}
+        <div
+          aria-hidden={!generating}
+          className={`flex items-center gap-2 rounded-md border border-dashed border-border/70 p-3 transition-opacity duration-300 ${
+            generating ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <span className="h-3 w-3 animate-spin rounded-full border border-steel/30 border-t-steel" />
+          <span className="text-[11px] text-muted-foreground">
+            Drafting question {Math.min(count + 1, QUESTIONS.length)}
+            <span className="animate-caret-blink">▌</span>
+          </span>
+        </div>
       </div>
     </div>
   );

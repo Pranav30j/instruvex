@@ -36,7 +36,7 @@ export default function CertificateDemo() {
         </div>
       </div>
 
-      <div className="mt-3 min-h-[112px]">
+      <div className="mt-3 h-[132px]">
         {stage === 1 && (
           <div className="flex items-center gap-2 rounded-md border border-border p-3">
             <span className="h-3 w-3 animate-spin rounded-full border border-steel/30 border-t-steel" />
