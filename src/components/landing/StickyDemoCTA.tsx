@@ -11,7 +11,10 @@ const StickyDemoCTA = () => {
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    setVisible(latest > 600);
+    const next = latest > 600;
+    // Only re-render on an actual transition — setting state on every scroll
+    // frame caused continuous re-renders (and layout jitter) on mobile.
+    setVisible((prev) => (prev === next ? prev : next));
   });
 
   return (

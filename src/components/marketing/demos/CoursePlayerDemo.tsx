@@ -37,7 +37,7 @@ export default function CoursePlayerDemo() {
             </div>
           </div>
         </div>
-        <p className="mt-2.5 font-display text-sm font-semibold text-foreground">{LESSONS[activeIndex]}</p>
+        <p className="mt-2.5 truncate font-display text-sm font-semibold text-foreground">{LESSONS[activeIndex]}</p>
         <p className="text-[11px] text-muted-foreground">Module 2 · Deep Learning Foundations</p>
       </div>
 
