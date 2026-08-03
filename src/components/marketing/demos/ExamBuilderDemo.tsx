@@ -33,11 +33,11 @@ export default function ExamBuilderDemo() {
   return (
     <div className="p-4 sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <p className="font-display text-sm font-semibold text-foreground">Data Structures — Mid Term</p>
+        <div className="min-w-0">
+          <p className="truncate font-display text-sm font-semibold text-foreground">Data Structures — Mid Term</p>
           <p className="text-[11px] text-muted-foreground">B.Tech CSE · Semester 4 · 90 minutes</p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-steel/25 bg-steel/10 px-2.5 py-1 text-[10px] font-medium text-steel">
+        <div className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-steel/25 bg-steel/10 px-2.5 py-1 text-[10px] font-medium text-steel">
           <span className={`h-1.5 w-1.5 rounded-full bg-steel ${generating ? "animate-pulse" : ""}`} />
           {generating ? "Generating…" : "4 questions ready"}
         </div>
