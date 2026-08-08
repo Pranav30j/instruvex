@@ -14,6 +14,7 @@ import ExamList from "./pages/ExamList";
 import ExamCreate from "./pages/ExamCreate";
 import ExamView from "./pages/ExamView";
 import ExamTake from "./pages/ExamTake";
+import ExamStart from "./pages/ExamStart";
 import AIGenerator from "./pages/AIGenerator";
 import QuestionBank from "./pages/QuestionBank";
 import Students from "./pages/Students";
@@ -133,6 +134,10 @@ const App = () => (
             <Route
               path="/dashboard/exams/:examId/edit"
               element={<ProtectedRoute allowedRoles={["super_admin", "instructor"]}><ExamCreate /></ProtectedRoute>}
+            />
+            <Route
+              path="/exam/:examId/start"
+              element={<ProtectedRoute><ExamStart /></ProtectedRoute>}
             />
             <Route
               path="/exam/:examId/take"

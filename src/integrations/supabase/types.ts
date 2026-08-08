@@ -879,33 +879,51 @@ export type Database = {
       }
       exam_submissions: {
         Row: {
+          auto_submitted: boolean
           created_at: string
+          current_question_index: number
           exam_id: string
+          expires_at: string | null
           id: string
+          integrity_score: number
+          marked_for_review: Json
           started_at: string
           status: Database["public"]["Enums"]["submission_status"]
           student_id: string
           submitted_at: string | null
+          time_spent_seconds: number
           total_score: number | null
         }
         Insert: {
+          auto_submitted?: boolean
           created_at?: string
+          current_question_index?: number
           exam_id: string
+          expires_at?: string | null
           id?: string
+          integrity_score?: number
+          marked_for_review?: Json
           started_at?: string
           status?: Database["public"]["Enums"]["submission_status"]
           student_id: string
           submitted_at?: string | null
+          time_spent_seconds?: number
           total_score?: number | null
         }
         Update: {
+          auto_submitted?: boolean
           created_at?: string
+          current_question_index?: number
           exam_id?: string
+          expires_at?: string | null
           id?: string
+          integrity_score?: number
+          marked_for_review?: Json
           started_at?: string
           status?: Database["public"]["Enums"]["submission_status"]
           student_id?: string
           submitted_at?: string | null
+          time_spent_seconds?: number
           total_score?: number | null
         }
         Relationships: [
@@ -920,6 +938,7 @@ export type Database = {
       }
       exams: {
         Row: {
+          attempt_limit: number
           created_at: string
           created_by: string
           description: string | null
@@ -927,7 +946,10 @@ export type Database = {
           end_time: string | null
           id: string
           institute_id: string | null
+          negative_marking: number
           passing_marks: number
+          results_published: boolean
+          security_settings: Json
           show_results: boolean
           shuffle_questions: boolean
           start_time: string | null
@@ -937,6 +959,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attempt_limit?: number
           created_at?: string
           created_by: string
           description?: string | null
@@ -944,7 +967,10 @@ export type Database = {
           end_time?: string | null
           id?: string
           institute_id?: string | null
+          negative_marking?: number
           passing_marks?: number
+          results_published?: boolean
+          security_settings?: Json
           show_results?: boolean
           shuffle_questions?: boolean
           start_time?: string | null
@@ -954,6 +980,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attempt_limit?: number
           created_at?: string
           created_by?: string
           description?: string | null
@@ -961,7 +988,10 @@ export type Database = {
           end_time?: string | null
           id?: string
           institute_id?: string | null
+          negative_marking?: number
           passing_marks?: number
+          results_published?: boolean
+          security_settings?: Json
           show_results?: boolean
           shuffle_questions?: boolean
           start_time?: string | null
@@ -1558,6 +1588,54 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          exam_id: string
+          id: string
+          metadata: Json
+          severity: string
+          student_id: string
+          submission_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          exam_id: string
+          id?: string
+          metadata?: Json
+          severity?: string
+          student_id: string
+          submission_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          exam_id?: string
+          id?: string
+          metadata?: Json
+          severity?: string
+          student_id?: string
+          submission_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_events_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "security_events_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "exam_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_answers: {
         Row: {
           code_answer: string | null
@@ -1867,6 +1945,31 @@ export type Database = {
       recover_super_admin: {
         Args: { _user_email: string; _user_id: string }
         Returns: Json
+      }
+      start_exam_attempt: {
+        Args: { _exam_id: string }
+        Returns: {
+          auto_submitted: boolean
+          created_at: string
+          current_question_index: number
+          exam_id: string
+          expires_at: string | null
+          id: string
+          integrity_score: number
+          marked_for_review: Json
+          started_at: string
+          status: Database["public"]["Enums"]["submission_status"]
+          student_id: string
+          submitted_at: string | null
+          time_spent_seconds: number
+          total_score: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "exam_submissions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
