@@ -176,3 +176,23 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Secure examination portal: disable text selection except inside answer
+   fields and the code editor (which opt in with data-clipboard-allowed). */
+body.exam-no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+body.exam-no-select input,
+body.exam-no-select textarea,
+body.exam-no-select [data-clipboard-allowed="true"],
+body.exam-no-select [data-clipboard-allowed="true"] * {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+@media print {
+  body.exam-no-print * {
+    display: none !important;
+  }
+}
