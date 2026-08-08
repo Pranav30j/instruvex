@@ -305,7 +305,7 @@ const ExamTake = () => {
         title: auto ? "Time expired" : "Examination submitted",
         description: auto ? "Your answers were submitted automatically." : "Your attempt has been recorded.",
       });
-      navigate(`/exam/${examId}/result/${submissionId}`, { replace: true });
+      navigate(`/dashboard/exams/${examId}`, { replace: true });
     },
     [submissionId, flushAnswers, exam, user, toast, navigate, examId],
   );
