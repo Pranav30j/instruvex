@@ -143,11 +143,7 @@ const ExamView = () => {
           {showStudentActions && studentState === "expired" && (
             <Button variant="outline" size="lg" disabled><Lock size={16} /> Exam Closed</Button>
           )}
-          {isCreator && isPublished && (
-            <Button variant="outline" size="lg" asChild>
-              <Link to={`/exam/${examId}/start`}><Play size={16} /> Preview Exam</Link>
-            </Button>
-          )}
+
           {isCreator && (
             <>
               <Button variant="outline" size="lg" asChild>

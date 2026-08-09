@@ -62,7 +62,24 @@ const ExamStart = () => {
         return;
       }
 
-      setExam(examData as unknown as ExamInfo);
+      const info = examData as unknown as ExamInfo;
+      if (!["published", "active"].includes(info.status)) {
+        setError("This examination is not currently available.");
+        setLoading(false);
+        return;
+      }
+      if (info.end_time && new Date(info.end_time).getTime() < Date.now()) {
+        setError("This examination window has closed.");
+        setLoading(false);
+        return;
+      }
+      if ((examData as any).start_time && new Date((examData as any).start_time).getTime() > Date.now()) {
+        setError(`This examination starts on ${new Date((examData as any).start_time).toLocaleString()}.`);
+        setLoading(false);
+        return;
+      }
+
+      setExam(info);
       setSettings(parseSecuritySettings((examData as any).security_settings));
 
       const [{ count }, { data: subs }] = await Promise.all([
