@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Play, Clock, FileText, Users, Pencil, Shield } from "lucide-react";
+import { ArrowLeft, Play, Clock, FileText, Users, Pencil, Shield, CheckCircle2, CalendarClock, Lock, Repeat, MinusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ const ExamView = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [submissionCount, setSubmissionCount] = useState(0);
+  const [mySubmissions, setMySubmissions] = useState<{ id: string; status: string }[]>([]);
 
   useEffect(() => {
     if (!examId) return;
@@ -31,10 +32,19 @@ const ExamView = () => {
       setExam(examData);
       setQuestions(qData || []);
       setSubmissionCount(count || 0);
+
+      if (user) {
+        const { data: mine } = await supabase
+          .from("exam_submissions")
+          .select("id, status")
+          .eq("exam_id", examId)
+          .eq("student_id", user.id);
+        setMySubmissions((mine || []).map((m) => ({ id: m.id, status: m.status as string })));
+      }
       setLoading(false);
     };
     load();
-  }, [examId]);
+  }, [examId, user]);
 
   if (loading) {
     return (
@@ -55,7 +65,23 @@ const ExamView = () => {
   }
 
   const isCreator = user?.id === exam.created_by;
-  const canTake = !isCreator && ["published", "active"].includes(exam.status);
+  const now = Date.now();
+  const attemptLimit = Math.max(exam.attempt_limit ?? 1, 1);
+  const hasActiveAttempt = mySubmissions.some((s) => s.status === "in_progress");
+  const isPublished = ["published", "active"].includes(exam.status);
+  const notStarted = !!exam.start_time && new Date(exam.start_time).getTime() > now;
+  const isExpired = !!exam.end_time && new Date(exam.end_time).getTime() < now;
+  const attemptsExhausted = mySubmissions.length >= attemptLimit;
+
+  let studentState: "in_progress" | "available" | "upcoming" | "completed" | "expired" | "unavailable" = "unavailable";
+  if (isPublished) {
+    if (hasActiveAttempt) studentState = "in_progress";
+    else if (isExpired) studentState = "expired";
+    else if (attemptsExhausted) studentState = "completed";
+    else if (notStarted) studentState = "upcoming";
+    else studentState = "available";
+  }
+  const showStudentActions = !isCreator && studentState !== "unavailable";
 
   return (
     <DashboardLayout>
@@ -84,12 +110,40 @@ const ExamView = () => {
           </div>
         </div>
 
-        <div className="flex gap-3 mb-8">
-          {canTake && (
+        {!isCreator && isPublished && (
+          <div className="mb-6 flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card-gradient p-4 text-sm shadow-card">
+            <span className="flex items-center gap-2 text-muted-foreground"><Repeat size={14} /> Attempt {Math.min(mySubmissions.length + 1, attemptLimit)} of {attemptLimit}</span>
+            {Number(exam.negative_marking) > 0 && (
+              <span className="flex items-center gap-2 text-muted-foreground"><MinusCircle size={14} /> Negative marking: -{exam.negative_marking}</span>
+            )}
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-3 mb-8">
+          {showStudentActions && studentState === "available" && (
             <Button variant="hero" size="lg" asChild>
-              <Link to={`/exam/${examId}/take`}><Play size={16} /> Start Exam</Link>
+              <Link to={`/exam/${examId}/start`}><Play size={16} /> Attempt Exam</Link>
             </Button>
           )}
+          {showStudentActions && studentState === "in_progress" && (
+            <Button variant="hero" size="lg" asChild>
+              <Link to={`/exam/${examId}/take`}><Play size={16} /> Continue Exam</Link>
+            </Button>
+          )}
+          {showStudentActions && studentState === "upcoming" && (
+            <Button variant="outline" size="lg" disabled>
+              <CalendarClock size={16} /> Starts {exam.start_time ? new Date(exam.start_time).toLocaleString() : "soon"}
+            </Button>
+          )}
+          {showStudentActions && studentState === "completed" && (
+            <Button variant="outline" size="lg" disabled>
+              <CheckCircle2 size={16} /> Completed — {mySubmissions.length}/{attemptLimit} attempts used
+            </Button>
+          )}
+          {showStudentActions && studentState === "expired" && (
+            <Button variant="outline" size="lg" disabled><Lock size={16} /> Exam Closed</Button>
+          )}
+
           {isCreator && (
             <>
               <Button variant="outline" size="lg" asChild>
