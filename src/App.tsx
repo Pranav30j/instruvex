@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AnalyticsProvider from "@/components/AnalyticsProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { InstitutionProvider } from "@/contexts/InstitutionContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -70,6 +71,7 @@ const App = () => (
       <BrowserRouter>
         <AnalyticsProvider />
         <AuthProvider>
+          <InstitutionProvider>
           <Routes>
             {/* Public verification routes */}
             <Route path="/verify" element={<VerifyPortal />} />
