@@ -1013,6 +1013,9 @@ export type Database = {
           logo_url: string | null
           name: string
           phone: string | null
+          primary_color: string | null
+          slug: string | null
+          status: string
           updated_at: string
           website: string | null
         }
@@ -1026,6 +1029,9 @@ export type Database = {
           logo_url?: string | null
           name: string
           phone?: string | null
+          primary_color?: string | null
+          slug?: string | null
+          status?: string
           updated_at?: string
           website?: string | null
         }
@@ -1039,10 +1045,48 @@ export type Database = {
           logo_url?: string | null
           name?: string
           phone?: string | null
+          primary_color?: string | null
+          slug?: string | null
+          status?: string
           updated_at?: string
           website?: string | null
         }
         Relationships: []
+      }
+      institution_members: {
+        Row: {
+          created_at: string
+          id: string
+          institution_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          institution_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          institution_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "institution_members_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       internship_certificates: {
         Row: {
@@ -1940,6 +1984,10 @@ export type Database = {
       }
       is_institute_admin_for: {
         Args: { _institute_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_institution_member: {
+        Args: { _institution_id: string; _user_id: string }
         Returns: boolean
       }
       recover_super_admin: {
