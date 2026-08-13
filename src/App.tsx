@@ -231,6 +231,7 @@ const App = () => (
               element={<ProtectedRoute><ResumeHistory /></ProtectedRoute>}
             />
           </Routes>
+          </InstitutionProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
