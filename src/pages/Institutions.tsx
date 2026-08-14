@@ -257,7 +257,10 @@ const Institutions = () => {
   };
 
   const filtered = institutes.filter(
-    (i) => i.name.toLowerCase().includes(search.toLowerCase()) || i.code?.toLowerCase().includes(search.toLowerCase())
+    (i) =>
+      i.name.toLowerCase().includes(search.toLowerCase()) ||
+      i.code?.toLowerCase().includes(search.toLowerCase()) ||
+      i.slug?.toLowerCase().includes(search.toLowerCase())
   );
 
   const getDepartments = (instId: string) => departments.filter((d) => d.institute_id === instId);
@@ -303,12 +306,19 @@ const Institutions = () => {
         {/* Search */}
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-          <Input placeholder="Search institutes..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          <Input placeholder="Search by name, code or slug..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
 
         {/* Institute list */}
         {loading ? (
           <div className="py-12 text-center text-muted-foreground">Loading...</div>
+        ) : loadError ? (
+          <Card className="border-border bg-card">
+            <CardContent className="flex flex-col items-center gap-3 py-12">
+              <p className="text-sm text-destructive">{loadError}</p>
+              <Button variant="outline" onClick={fetchAll}>Retry</Button>
+            </CardContent>
+          </Card>
         ) : filtered.length === 0 ? (
           <Card className="border-border bg-card">
             <CardContent className="flex flex-col items-center gap-3 py-12">
@@ -327,15 +337,24 @@ const Institutions = () => {
               <AccordionItem key={inst.id} value={inst.id} className="rounded-lg border border-border bg-card px-0">
                 <AccordionTrigger className="px-5 py-4 hover:no-underline">
                   <div className="flex flex-1 items-center gap-3 text-left">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <Building2 size={20} className="text-primary" />
+                    <div
+                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"
+                      style={inst.primary_color ? { backgroundColor: `${inst.primary_color}22` } : undefined}
+                    >
+                      <Building2 size={20} className="text-primary" style={inst.primary_color ? { color: inst.primary_color } : undefined} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-foreground">{inst.name}</span>
                         {inst.code && <Badge variant="secondary" className="text-xs">{inst.code}</Badge>}
+                        <Badge variant={inst.status === "active" ? "default" : "secondary"} className="text-[10px]">
+                          {inst.status || "active"}
+                        </Badge>
                       </div>
                       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                        {inst.slug && <span>/{inst.slug}</span>}
+                        <span className="flex items-center gap-1"><Users size={12} />{memberCounts[inst.id] || 0} member(s)</span>
+                        <span>Created {new Date(inst.created_at).toLocaleDateString()}</span>
                         {inst.email && <span className="flex items-center gap-1"><Mail size={12} />{inst.email}</span>}
                         {inst.phone && <span className="flex items-center gap-1"><Phone size={12} />{inst.phone}</span>}
                         {inst.website && <span className="flex items-center gap-1"><Globe size={12} />{inst.website}</span>}
@@ -352,8 +371,11 @@ const Institutions = () => {
                   {canManage && (
                     <div className="mb-4 flex gap-2">
                       <Button size="sm" variant="outline" onClick={() => openInstEdit(inst)} className="gap-1"><Pencil size={14} /> Edit</Button>
+                      <Button size="sm" variant="outline" onClick={() => setMembersFor(inst)} className="gap-1"><Users size={14} /> Members</Button>
                       <Button size="sm" variant="outline" onClick={() => openDeptCreate(inst.id)} className="gap-1"><Plus size={14} /> Add Department</Button>
-                      <Button size="sm" variant="destructive" onClick={() => deleteInstitute(inst.id)} className="gap-1"><Trash2 size={14} /> Delete</Button>
+                      {isSuperAdmin && (
+                        <Button size="sm" variant="destructive" onClick={() => deleteInstitute(inst.id)} className="gap-1"><Trash2 size={14} /> Delete</Button>
+                      )}
                     </div>
                   )}
 
