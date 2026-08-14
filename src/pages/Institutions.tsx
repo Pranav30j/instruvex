@@ -9,10 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import InstitutionMembersDialog from "@/components/institutions/InstitutionMembersDialog";
 import { toast } from "sonner";
 import {
   Building2, Plus, Search, Globe, Mail, Phone, MapPin, Layers, GraduationCap,
-  Pencil, Trash2, ChevronRight,
+  Pencil, Trash2, Users,
 } from "lucide-react";
 
 interface Institute {
@@ -26,6 +28,9 @@ interface Institute {
   website: string | null;
   created_by: string;
   created_at: string;
+  slug: string | null;
+  primary_color: string | null;
+  status: string | null;
 }
 
 interface Department {
@@ -46,37 +51,64 @@ interface Batch {
 
 type FormMode = "create" | "edit";
 
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
 const Institutions = () => {
   const { user, hasRole } = useAuth();
   const [institutes, setInstitutes] = useState<Institute[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
+  const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Dialog states
   const [instDialogOpen, setInstDialogOpen] = useState(false);
   const [deptDialogOpen, setDeptDialogOpen] = useState(false);
   const [batchDialogOpen, setBatchDialogOpen] = useState(false);
   const [formMode, setFormMode] = useState<FormMode>("create");
+  const [membersFor, setMembersFor] = useState<Institute | null>(null);
+  const [saving, setSaving] = useState(false);
 
   // Form states
-  const [instForm, setInstForm] = useState({ id: "", name: "", code: "", email: "", phone: "", address: "", website: "" });
+  const [instForm, setInstForm] = useState({
+    id: "", name: "", code: "", email: "", phone: "", address: "", website: "",
+    slug: "", primary_color: "#2F6FED", status: "active",
+  });
   const [deptForm, setDeptForm] = useState({ id: "", institute_id: "", name: "", code: "", head_name: "" });
   const [batchForm, setBatchForm] = useState({ id: "", department_id: "", name: "", year: "", is_active: true });
 
   const canManage = hasRole("super_admin") || hasRole("institute_admin");
+  const isSuperAdmin = hasRole("super_admin");
 
   const fetchAll = async () => {
     setLoading(true);
-    const [instRes, deptRes, batchRes] = await Promise.all([
+    setLoadError(null);
+    const [instRes, deptRes, batchRes, memberRes] = await Promise.all([
       supabase.from("institutes").select("*").order("name"),
       supabase.from("departments").select("*").order("name"),
       supabase.from("batches").select("*").order("name"),
+      supabase.from("institution_members").select("institution_id, status"),
     ]);
+    if (instRes.error) setLoadError(instRes.error.message);
     if (instRes.data) setInstitutes(instRes.data as Institute[]);
     if (deptRes.data) setDepartments(deptRes.data as Department[]);
     if (batchRes.data) setBatches(batchRes.data as Batch[]);
+    if (memberRes.data) {
+      const counts: Record<string, number> = {};
+      (memberRes.data as { institution_id: string; status: string }[]).forEach((m) => {
+        if (m.status === "active") counts[m.institution_id] = (counts[m.institution_id] || 0) + 1;
+      });
+      setMemberCounts(counts);
+    }
     setLoading(false);
   };
 
@@ -85,35 +117,52 @@ const Institutions = () => {
   // Institute CRUD
   const openInstCreate = () => {
     setFormMode("create");
-    setInstForm({ id: "", name: "", code: "", email: "", phone: "", address: "", website: "" });
+    setInstForm({ id: "", name: "", code: "", email: "", phone: "", address: "", website: "", slug: "", primary_color: "#2F6FED", status: "active" });
     setInstDialogOpen(true);
   };
 
   const openInstEdit = (inst: Institute) => {
     setFormMode("edit");
-    setInstForm({ id: inst.id, name: inst.name, code: inst.code || "", email: inst.email || "", phone: inst.phone || "", address: inst.address || "", website: inst.website || "" });
+    setInstForm({
+      id: inst.id, name: inst.name, code: inst.code || "", email: inst.email || "",
+      phone: inst.phone || "", address: inst.address || "", website: inst.website || "",
+      slug: inst.slug || "", primary_color: inst.primary_color || "#2F6FED", status: inst.status || "active",
+    });
     setInstDialogOpen(true);
   };
 
   const saveInstitute = async () => {
     if (!instForm.name.trim()) { toast.error("Name is required"); return; }
-    if (formMode === "create") {
-      const { error } = await supabase.from("institutes").insert({
-        name: instForm.name, code: instForm.code || null, email: instForm.email || null,
-        phone: instForm.phone || null, address: instForm.address || null,
-        website: instForm.website || null, created_by: user!.id,
-      });
-      if (error) { toast.error(error.message); return; }
-      toast.success("Institute created");
-    } else {
-      const { error } = await supabase.from("institutes").update({
-        name: instForm.name, code: instForm.code || null, email: instForm.email || null,
-        phone: instForm.phone || null, address: instForm.address || null,
-        website: instForm.website || null,
-      }).eq("id", instForm.id);
-      if (error) { toast.error(error.message); return; }
-      toast.success("Institute updated");
+    const slug = slugify(instForm.slug || instForm.name);
+    if (!slug) { toast.error("A valid slug is required"); return; }
+
+    setSaving(true);
+    // Slug must stay unique across institutions.
+    const slugCheck = await supabase.from("institutes").select("id").eq("slug", slug).maybeSingle();
+    if (slugCheck.data && slugCheck.data.id !== instForm.id) {
+      setSaving(false);
+      toast.error(`The slug "${slug}" is already used by another institution`);
+      return;
     }
+
+    const payload = {
+      name: instForm.name.trim(), code: instForm.code || null, email: instForm.email || null,
+      phone: instForm.phone || null, address: instForm.address || null,
+      website: instForm.website || null, slug,
+      primary_color: instForm.primary_color || null,
+      status: instForm.status || "active",
+    };
+
+    const { error } = formMode === "create"
+      ? await supabase.from("institutes").insert({ ...payload, created_by: user!.id })
+      : await supabase.from("institutes").update(payload).eq("id", instForm.id);
+
+    setSaving(false);
+    if (error) {
+      toast.error(error.message.includes("duplicate") ? "An institution with this slug or code already exists" : error.message);
+      return;
+    }
+    toast.success(formMode === "create" ? "Institute created" : "Institute updated");
     setInstDialogOpen(false);
     fetchAll();
   };
