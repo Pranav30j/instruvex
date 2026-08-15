@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_years: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          institute_id: string
+          is_current: boolean
+          name: string
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          institute_id: string
+          is_current?: boolean
+          name: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          institute_id?: string
+          is_current?: boolean
+          name?: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_years_institute_id_fkey"
+            columns: ["institute_id"]
+            isOneToOne: false
+            referencedRelation: "institutes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       academy_certificates: {
         Row: {
           certificate_number: string
@@ -657,27 +701,33 @@ export type Database = {
       }
       batches: {
         Row: {
+          academic_year_id: string | null
           created_at: string
           department_id: string
           id: string
+          institute_id: string | null
           is_active: boolean
           name: string
           updated_at: string
           year: number | null
         }
         Insert: {
+          academic_year_id?: string | null
           created_at?: string
           department_id: string
           id?: string
+          institute_id?: string | null
           is_active?: boolean
           name: string
           updated_at?: string
           year?: number | null
         }
         Update: {
+          academic_year_id?: string | null
           created_at?: string
           department_id?: string
           id?: string
+          institute_id?: string | null
           is_active?: boolean
           name?: string
           updated_at?: string
@@ -685,10 +735,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "batches_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "batches_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batches_institute_id_fkey"
+            columns: ["institute_id"]
+            isOneToOne: false
+            referencedRelation: "institutes"
             referencedColumns: ["id"]
           },
         ]
@@ -740,32 +804,52 @@ export type Database = {
       }
       class_students: {
         Row: {
+          academic_year_id: string | null
           batch_id: string
           created_at: string
           id: string
           roll_number: string | null
+          section_id: string | null
           student_id: string
         }
         Insert: {
+          academic_year_id?: string | null
           batch_id: string
           created_at?: string
           id?: string
           roll_number?: string | null
+          section_id?: string | null
           student_id: string
         }
         Update: {
+          academic_year_id?: string | null
           batch_id?: string
           created_at?: string
           id?: string
           roll_number?: string | null
+          section_id?: string | null
           student_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "class_students_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "class_students_batch_id_fkey"
             columns: ["batch_id"]
             isOneToOne: false
             referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_students_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
             referencedColumns: ["id"]
           },
         ]
@@ -1082,6 +1166,45 @@ export type Database = {
           {
             foreignKeyName: "institution_members_institution_id_fkey"
             columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instructor_departments: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          id: string
+          institute_id: string
+          instructor_id: string
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          institute_id: string
+          instructor_id: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          institute_id?: string
+          instructor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instructor_departments_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instructor_departments_institute_id_fkey"
+            columns: ["institute_id"]
             isOneToOne: false
             referencedRelation: "institutes"
             referencedColumns: ["id"]
@@ -1632,6 +1755,71 @@ export type Database = {
         }
         Relationships: []
       }
+      sections: {
+        Row: {
+          academic_year_id: string | null
+          batch_id: string
+          code: string | null
+          created_at: string
+          department_id: string | null
+          id: string
+          institute_id: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          batch_id: string
+          code?: string | null
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          institute_id?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          batch_id?: string
+          code?: string | null
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          institute_id?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sections_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sections_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sections_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sections_institute_id_fkey"
+            columns: ["institute_id"]
+            isOneToOne: false
+            referencedRelation: "institutes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_events: {
         Row: {
           created_at: string
@@ -1754,30 +1942,61 @@ export type Database = {
       }
       subjects: {
         Row: {
+          academic_year_id: string | null
           code: string | null
           created_at: string
           created_by: string
+          department_id: string | null
           id: string
+          institute_id: string | null
           name: string
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           code?: string | null
           created_at?: string
           created_by: string
+          department_id?: string | null
           id?: string
+          institute_id?: string | null
           name: string
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           code?: string | null
           created_at?: string
           created_by?: string
+          department_id?: string | null
           id?: string
+          institute_id?: string | null
           name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subjects_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subjects_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subjects_institute_id_fkey"
+            columns: ["institute_id"]
+            isOneToOne: false
+            referencedRelation: "institutes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -1948,6 +2167,10 @@ export type Database = {
       }
     }
     Functions: {
+      can_manage_institute: {
+        Args: { _institute_id: string; _user_id: string }
+        Returns: boolean
+      }
       create_notification: {
         Args: {
           _link?: string
