@@ -455,7 +455,44 @@ const Institutions = () => {
               <div><Label>Website</Label><Input value={instForm.website} onChange={(e) => setInstForm({ ...instForm, website: e.target.value })} /></div>
             </div>
             <div><Label>Address</Label><Input value={instForm.address} onChange={(e) => setInstForm({ ...instForm, address: e.target.value })} /></div>
-            <Button onClick={saveInstitute} className="w-full">{formMode === "create" ? "Create" : "Save Changes"}</Button>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Slug</Label>
+                <Input
+                  value={instForm.slug}
+                  onChange={(e) => setInstForm({ ...instForm, slug: e.target.value })}
+                  placeholder={slugify(instForm.name) || "auto-from-name"}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">Used in URLs. Leave blank to generate from the name.</p>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={instForm.status} onValueChange={(v) => setInstForm({ ...instForm, status: v })}>
+                  <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Primary Colour</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={instForm.primary_color || "#2F6FED"}
+                  onChange={(e) => setInstForm({ ...instForm, primary_color: e.target.value })}
+                  className="h-9 w-12 cursor-pointer rounded border border-border bg-background p-1"
+                  aria-label="Primary colour"
+                />
+                <Input value={instForm.primary_color} onChange={(e) => setInstForm({ ...instForm, primary_color: e.target.value })} placeholder="#2F6FED" />
+              </div>
+            </div>
+            <Button onClick={saveInstitute} disabled={saving} className="w-full">
+              {saving ? "Saving..." : formMode === "create" ? "Create" : "Save Changes"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -496,6 +533,15 @@ const Institutions = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Members management */}
+      <InstitutionMembersDialog
+        institutionId={membersFor?.id ?? null}
+        institutionName={membersFor?.name ?? ""}
+        open={!!membersFor}
+        onOpenChange={(o) => { if (!o) setMembersFor(null); }}
+        onChanged={fetchAll}
+      />
     </DashboardLayout>
   );
 };
