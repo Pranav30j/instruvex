@@ -286,6 +286,9 @@ const Institutions = () => {
   const getDepartments = (instId: string) => departments.filter((d) => d.institute_id === instId);
   const getBatches = (deptId: string) => batches.filter((b) => b.department_id === deptId);
 
+  const batchInstituteId = departments.find((d) => d.id === batchForm.department_id)?.institute_id ?? null;
+  const batchInstituteYears = academicYears.filter((y) => y.institute_id === batchInstituteId);
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
