@@ -11,10 +11,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import InstitutionMembersDialog from "@/components/institutions/InstitutionMembersDialog";
+import InstitutionAcademicsDialog from "@/components/institutions/InstitutionAcademicsDialog";
 import { toast } from "sonner";
 import {
   Building2, Plus, Search, Globe, Mail, Phone, MapPin, Layers, GraduationCap,
-  Pencil, Trash2, Users,
+  Pencil, Trash2, Users, CalendarRange,
 } from "lucide-react";
 
 interface Institute {
@@ -47,9 +48,19 @@ interface Batch {
   name: string;
   year: number | null;
   is_active: boolean;
+  academic_year_id: string | null;
+}
+
+interface AcademicYearOption {
+  id: string;
+  institute_id: string;
+  name: string;
+  is_current: boolean;
 }
 
 type FormMode = "create" | "edit";
+
+const NO_YEAR = "__none__";
 
 const slugify = (value: string) =>
   value
@@ -65,6 +76,7 @@ const Institutions = () => {
   const [institutes, setInstitutes] = useState<Institute[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
+  const [academicYears, setAcademicYears] = useState<AcademicYearOption[]>([]);
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -76,6 +88,7 @@ const Institutions = () => {
   const [batchDialogOpen, setBatchDialogOpen] = useState(false);
   const [formMode, setFormMode] = useState<FormMode>("create");
   const [membersFor, setMembersFor] = useState<Institute | null>(null);
+  const [academicsFor, setAcademicsFor] = useState<Institute | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Form states
@@ -84,7 +97,7 @@ const Institutions = () => {
     slug: "", primary_color: "#2F6FED", status: "active",
   });
   const [deptForm, setDeptForm] = useState({ id: "", institute_id: "", name: "", code: "", head_name: "" });
-  const [batchForm, setBatchForm] = useState({ id: "", department_id: "", name: "", year: "", is_active: true });
+  const [batchForm, setBatchForm] = useState({ id: "", department_id: "", name: "", year: "", is_active: true, academic_year_id: NO_YEAR });
 
   const canManage = hasRole("super_admin") || hasRole("institute_admin");
   const isSuperAdmin = hasRole("super_admin");
@@ -92,16 +105,18 @@ const Institutions = () => {
   const fetchAll = async () => {
     setLoading(true);
     setLoadError(null);
-    const [instRes, deptRes, batchRes, memberRes] = await Promise.all([
+    const [instRes, deptRes, batchRes, memberRes, yearRes] = await Promise.all([
       supabase.from("institutes").select("*").order("name"),
       supabase.from("departments").select("*").order("name"),
       supabase.from("batches").select("*").order("name"),
       supabase.from("institution_members").select("institution_id, status"),
+      supabase.from("academic_years").select("id, institute_id, name, is_current").order("name"),
     ]);
     if (instRes.error) setLoadError(instRes.error.message);
     if (instRes.data) setInstitutes(instRes.data as Institute[]);
     if (deptRes.data) setDepartments(deptRes.data as Department[]);
     if (batchRes.data) setBatches(batchRes.data as Batch[]);
+    if (yearRes.data) setAcademicYears(yearRes.data as AcademicYearOption[]);
     if (memberRes.data) {
       const counts: Record<string, number> = {};
       (memberRes.data as { institution_id: string; status: string }[]).forEach((m) => {
