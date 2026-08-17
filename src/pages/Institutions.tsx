@@ -11,10 +11,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import InstitutionMembersDialog from "@/components/institutions/InstitutionMembersDialog";
+import InstitutionAcademicsDialog from "@/components/institutions/InstitutionAcademicsDialog";
 import { toast } from "sonner";
 import {
   Building2, Plus, Search, Globe, Mail, Phone, MapPin, Layers, GraduationCap,
-  Pencil, Trash2, Users,
+  Pencil, Trash2, Users, CalendarRange,
 } from "lucide-react";
 
 interface Institute {
@@ -47,9 +48,19 @@ interface Batch {
   name: string;
   year: number | null;
   is_active: boolean;
+  academic_year_id: string | null;
+}
+
+interface AcademicYearOption {
+  id: string;
+  institute_id: string;
+  name: string;
+  is_current: boolean;
 }
 
 type FormMode = "create" | "edit";
+
+const NO_YEAR = "__none__";
 
 const slugify = (value: string) =>
   value
@@ -65,6 +76,7 @@ const Institutions = () => {
   const [institutes, setInstitutes] = useState<Institute[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
+  const [academicYears, setAcademicYears] = useState<AcademicYearOption[]>([]);
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -76,6 +88,7 @@ const Institutions = () => {
   const [batchDialogOpen, setBatchDialogOpen] = useState(false);
   const [formMode, setFormMode] = useState<FormMode>("create");
   const [membersFor, setMembersFor] = useState<Institute | null>(null);
+  const [academicsFor, setAcademicsFor] = useState<Institute | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Form states
@@ -84,7 +97,7 @@ const Institutions = () => {
     slug: "", primary_color: "#2F6FED", status: "active",
   });
   const [deptForm, setDeptForm] = useState({ id: "", institute_id: "", name: "", code: "", head_name: "" });
-  const [batchForm, setBatchForm] = useState({ id: "", department_id: "", name: "", year: "", is_active: true });
+  const [batchForm, setBatchForm] = useState({ id: "", department_id: "", name: "", year: "", is_active: true, academic_year_id: NO_YEAR });
 
   const canManage = hasRole("super_admin") || hasRole("institute_admin");
   const isSuperAdmin = hasRole("super_admin");
@@ -92,16 +105,18 @@ const Institutions = () => {
   const fetchAll = async () => {
     setLoading(true);
     setLoadError(null);
-    const [instRes, deptRes, batchRes, memberRes] = await Promise.all([
+    const [instRes, deptRes, batchRes, memberRes, yearRes] = await Promise.all([
       supabase.from("institutes").select("*").order("name"),
       supabase.from("departments").select("*").order("name"),
       supabase.from("batches").select("*").order("name"),
       supabase.from("institution_members").select("institution_id, status"),
+      supabase.from("academic_years").select("id, institute_id, name, is_current").order("name"),
     ]);
     if (instRes.error) setLoadError(instRes.error.message);
     if (instRes.data) setInstitutes(instRes.data as Institute[]);
     if (deptRes.data) setDepartments(deptRes.data as Department[]);
     if (batchRes.data) setBatches(batchRes.data as Batch[]);
+    if (yearRes.data) setAcademicYears(yearRes.data as AcademicYearOption[]);
     if (memberRes.data) {
       const counts: Record<string, number> = {};
       (memberRes.data as { institution_id: string; status: string }[]).forEach((m) => {
@@ -217,23 +232,27 @@ const Institutions = () => {
   // Batch CRUD
   const openBatchCreate = (departmentId: string) => {
     setFormMode("create");
-    setBatchForm({ id: "", department_id: departmentId, name: "", year: "", is_active: true });
+    const dept = departments.find((d) => d.id === departmentId);
+    const currentYear = dept ? academicYears.find((y) => y.institute_id === dept.institute_id && y.is_current) : undefined;
+    setBatchForm({ id: "", department_id: departmentId, name: "", year: "", is_active: true, academic_year_id: currentYear?.id ?? NO_YEAR });
     setBatchDialogOpen(true);
   };
 
   const openBatchEdit = (batch: Batch) => {
     setFormMode("edit");
-    setBatchForm({ id: batch.id, department_id: batch.department_id, name: batch.name, year: batch.year?.toString() || "", is_active: batch.is_active });
+    setBatchForm({ id: batch.id, department_id: batch.department_id, name: batch.name, year: batch.year?.toString() || "", is_active: batch.is_active, academic_year_id: batch.academic_year_id ?? NO_YEAR });
     setBatchDialogOpen(true);
   };
 
   const saveBatch = async () => {
     if (!batchForm.name.trim()) { toast.error("Name is required"); return; }
+    const academicYearId = batchForm.academic_year_id === NO_YEAR ? null : batchForm.academic_year_id;
     if (formMode === "create") {
       const { error } = await supabase.from("batches").insert({
         department_id: batchForm.department_id, name: batchForm.name,
         year: batchForm.year ? parseInt(batchForm.year) : null,
         is_active: batchForm.is_active,
+        academic_year_id: academicYearId,
       });
       if (error) { toast.error(error.message); return; }
       toast.success("Batch created");
@@ -241,6 +260,7 @@ const Institutions = () => {
       const { error } = await supabase.from("batches").update({
         name: batchForm.name, year: batchForm.year ? parseInt(batchForm.year) : null,
         is_active: batchForm.is_active,
+        academic_year_id: academicYearId,
       }).eq("id", batchForm.id);
       if (error) { toast.error(error.message); return; }
       toast.success("Batch updated");
@@ -265,6 +285,9 @@ const Institutions = () => {
 
   const getDepartments = (instId: string) => departments.filter((d) => d.institute_id === instId);
   const getBatches = (deptId: string) => batches.filter((b) => b.department_id === deptId);
+
+  const batchInstituteId = departments.find((d) => d.id === batchForm.department_id)?.institute_id ?? null;
+  const batchInstituteYears = academicYears.filter((y) => y.institute_id === batchInstituteId);
 
   return (
     <DashboardLayout>
@@ -372,6 +395,7 @@ const Institutions = () => {
                     <div className="mb-4 flex gap-2">
                       <Button size="sm" variant="outline" onClick={() => openInstEdit(inst)} className="gap-1"><Pencil size={14} /> Edit</Button>
                       <Button size="sm" variant="outline" onClick={() => setMembersFor(inst)} className="gap-1"><Users size={14} /> Members</Button>
+                      <Button size="sm" variant="outline" onClick={() => setAcademicsFor(inst)} className="gap-1"><CalendarRange size={14} /> Academics</Button>
                       <Button size="sm" variant="outline" onClick={() => openDeptCreate(inst.id)} className="gap-1"><Plus size={14} /> Add Department</Button>
                       {isSuperAdmin && (
                         <Button size="sm" variant="destructive" onClick={() => deleteInstitute(inst.id)} className="gap-1"><Trash2 size={14} /> Delete</Button>
@@ -529,6 +553,19 @@ const Institutions = () => {
                 <input type="checkbox" checked={batchForm.is_active} onChange={(e) => setBatchForm({ ...batchForm, is_active: e.target.checked })} className="h-4 w-4 rounded border-border" />
               </div>
             </div>
+            <div>
+              <Label>Academic Year</Label>
+              <Select value={batchForm.academic_year_id} onValueChange={(v) => setBatchForm({ ...batchForm, academic_year_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_YEAR}>None</SelectItem>
+                  {batchInstituteYears.map((y) => (
+                    <SelectItem key={y.id} value={y.id}>{y.name}{y.is_current ? " (current)" : ""}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-1 text-xs text-muted-foreground">Optional — existing batches without an academic year keep working.</p>
+            </div>
             <Button onClick={saveBatch} className="w-full">{formMode === "create" ? "Create" : "Save Changes"}</Button>
           </div>
         </DialogContent>
@@ -540,6 +577,15 @@ const Institutions = () => {
         institutionName={membersFor?.name ?? ""}
         open={!!membersFor}
         onOpenChange={(o) => { if (!o) setMembersFor(null); }}
+        onChanged={fetchAll}
+      />
+
+      {/* Academic structure management */}
+      <InstitutionAcademicsDialog
+        institutionId={academicsFor?.id ?? null}
+        institutionName={academicsFor?.name ?? ""}
+        open={!!academicsFor}
+        onOpenChange={(o) => { if (!o) setAcademicsFor(null); }}
         onChanged={fetchAll}
       />
     </DashboardLayout>
