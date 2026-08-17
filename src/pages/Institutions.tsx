@@ -232,23 +232,27 @@ const Institutions = () => {
   // Batch CRUD
   const openBatchCreate = (departmentId: string) => {
     setFormMode("create");
-    setBatchForm({ id: "", department_id: departmentId, name: "", year: "", is_active: true });
+    const dept = departments.find((d) => d.id === departmentId);
+    const currentYear = dept ? academicYears.find((y) => y.institute_id === dept.institute_id && y.is_current) : undefined;
+    setBatchForm({ id: "", department_id: departmentId, name: "", year: "", is_active: true, academic_year_id: currentYear?.id ?? NO_YEAR });
     setBatchDialogOpen(true);
   };
 
   const openBatchEdit = (batch: Batch) => {
     setFormMode("edit");
-    setBatchForm({ id: batch.id, department_id: batch.department_id, name: batch.name, year: batch.year?.toString() || "", is_active: batch.is_active });
+    setBatchForm({ id: batch.id, department_id: batch.department_id, name: batch.name, year: batch.year?.toString() || "", is_active: batch.is_active, academic_year_id: batch.academic_year_id ?? NO_YEAR });
     setBatchDialogOpen(true);
   };
 
   const saveBatch = async () => {
     if (!batchForm.name.trim()) { toast.error("Name is required"); return; }
+    const academicYearId = batchForm.academic_year_id === NO_YEAR ? null : batchForm.academic_year_id;
     if (formMode === "create") {
       const { error } = await supabase.from("batches").insert({
         department_id: batchForm.department_id, name: batchForm.name,
         year: batchForm.year ? parseInt(batchForm.year) : null,
         is_active: batchForm.is_active,
+        academic_year_id: academicYearId,
       });
       if (error) { toast.error(error.message); return; }
       toast.success("Batch created");
@@ -256,6 +260,7 @@ const Institutions = () => {
       const { error } = await supabase.from("batches").update({
         name: batchForm.name, year: batchForm.year ? parseInt(batchForm.year) : null,
         is_active: batchForm.is_active,
+        academic_year_id: academicYearId,
       }).eq("id", batchForm.id);
       if (error) { toast.error(error.message); return; }
       toast.success("Batch updated");
