@@ -392,6 +392,7 @@ const Institutions = () => {
                     <div className="mb-4 flex gap-2">
                       <Button size="sm" variant="outline" onClick={() => openInstEdit(inst)} className="gap-1"><Pencil size={14} /> Edit</Button>
                       <Button size="sm" variant="outline" onClick={() => setMembersFor(inst)} className="gap-1"><Users size={14} /> Members</Button>
+                      <Button size="sm" variant="outline" onClick={() => setAcademicsFor(inst)} className="gap-1"><CalendarRange size={14} /> Academics</Button>
                       <Button size="sm" variant="outline" onClick={() => openDeptCreate(inst.id)} className="gap-1"><Plus size={14} /> Add Department</Button>
                       {isSuperAdmin && (
                         <Button size="sm" variant="destructive" onClick={() => deleteInstitute(inst.id)} className="gap-1"><Trash2 size={14} /> Delete</Button>
@@ -549,6 +550,19 @@ const Institutions = () => {
                 <input type="checkbox" checked={batchForm.is_active} onChange={(e) => setBatchForm({ ...batchForm, is_active: e.target.checked })} className="h-4 w-4 rounded border-border" />
               </div>
             </div>
+            <div>
+              <Label>Academic Year</Label>
+              <Select value={batchForm.academic_year_id} onValueChange={(v) => setBatchForm({ ...batchForm, academic_year_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_YEAR}>None</SelectItem>
+                  {batchInstituteYears.map((y) => (
+                    <SelectItem key={y.id} value={y.id}>{y.name}{y.is_current ? " (current)" : ""}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-1 text-xs text-muted-foreground">Optional — existing batches without an academic year keep working.</p>
+            </div>
             <Button onClick={saveBatch} className="w-full">{formMode === "create" ? "Create" : "Save Changes"}</Button>
           </div>
         </DialogContent>
@@ -560,6 +574,15 @@ const Institutions = () => {
         institutionName={membersFor?.name ?? ""}
         open={!!membersFor}
         onOpenChange={(o) => { if (!o) setMembersFor(null); }}
+        onChanged={fetchAll}
+      />
+
+      {/* Academic structure management */}
+      <InstitutionAcademicsDialog
+        institutionId={academicsFor?.id ?? null}
+        institutionName={academicsFor?.name ?? ""}
+        open={!!academicsFor}
+        onOpenChange={(o) => { if (!o) setAcademicsFor(null); }}
         onChanged={fetchAll}
       />
     </DashboardLayout>
